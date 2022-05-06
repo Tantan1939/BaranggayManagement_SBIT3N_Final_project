@@ -1,0 +1,173 @@
+{% extends 'Health_services/client_side/Main.html' %}
+{% block content %}
+
+<h2> Welcome to this page </h2>
+
+{% if send_this_data %}
+<p> We still process your validation document. Keep waiting... </p>
+
+<div id="cancel_form_div">
+    <form method="POST" enctype="multipart/form-data" id="cancel_me">
+        <p> Your Document: </p>
+        <img src="{{send_this_data.User_document.url}}" alt="" width="20%" id="cancel_this_pic">
+        <p> Send on {{send_this_data.Application_date}} </p>
+        <br>
+        {% csrf_token %}
+        <input type="hidden" name="cancel_this_id" id="cancel_this_id" value="{{send_this_data.id}}">
+        <input type="submit" value="Cancel">
+    </form>
+</div>
+
+{% else %}
+<div id="validate_form_div">
+    <p> Send us a copy of your brgy id, clearance or any proof that you are resident here. </p>
+    <form method="POST" enctype="multipart/form-data" id="validate_me">
+        <img src="" alt="" width="20%" id="this_pic">
+        <br>
+        {% csrf_token %}
+
+        <input type="file" name="validate_this_pic" id="validate_this_pic"> 
+        <br><br>
+        <input type="submit" value="Send" class="btn btn-primary">
+
+    </form>
+</div>
+{% endif %}
+
+<script>
+// Functions to clear validate_form_div
+function clear_validate_form_div(){
+    $("#validate_form_div").empty();
+    location.reload();
+}
+
+function clear_cancel_form_div(){
+    $("#cancel_form_div").empty();
+    location.reload();
+}
+
+    $(document).ready(function(){
+        $("#validate_this_pic").change(function () {
+            var ext = $('#validate_this_pic').val().split('.').pop().toLowerCase();
+            if($.inArray(ext, ['png','jpg','jpeg']) == -1) {
+
+                $("#validate_this_pic").val("");
+                $("#this_pic").attr("src", "");
+
+                if($.inArray(ext, ['']) == -1){
+                    alert('You can only upload jpg/png file.');
+                }
+
+            }else{
+                const file = this.files[0];
+                if (file) {
+                    let reader = new FileReader();
+                    reader.onload = function (event) {
+                    $("#this_pic")
+                    .attr("src", event.target.result);
+                };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    });
+
+    $(document).on('submit', '#validate_me', function(e){
+        e.preventDefault();
+
+        var img = $("#validate_this_pic").val();
+        var data = new FormData($('#validate_me').get(0));
+
+        if (img == ""){
+            alert('Submit Failed! Upload your document below.');
+        }else{
+            $.ajax({
+                type: 'POST',
+                url: '/Health_services/Validation/Validate_this_document/',
+                data: data,
+                contentType: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    switch(data){
+                        case "waiting":
+                            alert('You already filed an application before. Wait for the result.');
+                            clear_validate_form_div();
+                            location.href = '/Health_services/';
+                            break;
+
+                        case "accepted":
+                            alert('Your application is already accepted. You are now verified.');
+                            clear_validate_form_div();
+                            location.href = '/Health_services/';
+                            break;
+
+                        case "pending":
+                            alert('Application submitted. Kindly wait them to validate your application.');
+                            clear_validate_form_div();
+                            location.href = '/Health_services/';
+                            break;
+                        default:
+                            clear_validate_form_div();
+                            location.href = '/Health_services/';
+                            break;
+                    }
+                },
+                error: function(data){
+                    console.log(data);
+                    location.href = '/';
+                }
+            })
+        }
+
+    });
+
+    $(document).on('submit', '#cancel_me', function(e){
+        e.preventDefault();
+
+        var data = new FormData($('#cancel_me').get(0));
+        $.ajax({
+            type: 'POST',
+            url: '/Health_services/Validation/Cancel_this_application/',
+            data: data,
+            contentType: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            success: function(data){
+                switch(data){
+                    case "accepted":
+                        alert('Your application is already accepted.');
+                        clear_cancel_form_div();
+                        location.href = '/Health_services/';
+                        break;
+
+                    case "deleted":
+                        alert('Your application is now cancelled.');
+                        clear_cancel_form_div();
+                        location.href = '/Health_services/';
+                        break;
+                    
+                    case "xExist":
+                        alert('Your application is already cancelled or no longer exist.');
+                        clear_cancel_form_div();
+                        location.href = '/Health_services/';
+                        break;
+                    
+                    default:
+                        clear_cancel_form_div();
+                        console.log(data);
+                        location.href = '/Health_services/';
+                        break;
+                }
+            },
+            error: function(data){
+                console.log(data);
+                clear_cancel_form_div();
+                location.href = '/Health_services/';
+            }
+        });
+
+    });
+</script>
+
+{% endblock content %}

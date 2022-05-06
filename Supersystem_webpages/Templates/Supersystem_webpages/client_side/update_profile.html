@@ -1,0 +1,147 @@
+{% extends 'Supersystem_webpages/client_side/main.html' %}
+
+{% block content %}
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+<h4> Account Details </h4>
+
+
+<div id="disp1">
+    <img src="" alt="" id="profile_img" class="img-profile" data-bs-toggle="modal" data-bs-target="#showFileUpload">
+    <div id="disp3"></div>
+</div>
+
+<form method="POST" enctype="multipart/form-data" id="update_form">
+    {% csrf_token %}
+    <p> Age </p>
+    <input type="text" name="user_age" id="user_age">
+
+    <p> Contact Number </p>
+    <input type="text" name="contact_number" id="user_contact_number">
+
+    <input type="submit" value="Update">
+    <a href="/"> Back </a>
+</form>
+
+<!-- Image upload MODAL -->
+<div class="modal fade" id="showFileUpload" tabindex="-1" aria-labelledby="showFileUploadLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Upload new Profile Picture</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="xCloseModal"></button>
+        </div>
+        <div class="modal-body">
+        <p class="lead"></p>
+
+        <form method="POST" enctype="multipart/form-data" id="new_image">
+            {% csrf_token %}
+            <input type="file" name="profile_image" id="inputImage">
+            <input type="submit" value="Upload">
+        </form>
+
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeBtn">Close</button>
+        </div>
+    </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function(){
+        Get_user_details();
+    });
+
+    $(document).on("submit", "#update_form", function(e){
+        e.preventDefault();
+
+        var user_age = $("#user_age").val()
+        var user_contact_number = $("#user_contact_number").val()
+
+        if (user_age == "" || user_contact_number == ""){
+            // do nothing
+        }else{
+            var data = new FormData($('#update_form').get(0));
+            $.ajax({
+                type: "POST",
+                url: "func_update_account_details/",
+                data: data,
+                contentType: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    switch(data){
+                        case "updated":
+                            Get_user_details();
+                            location.href = "/"
+                            break;
+                    }
+                },
+                error: function(data){
+                    alert("Phone number already used in another account.")
+                }
+            })
+        }
+    })
+
+    $(document).on("submit", "#new_image", function(e){
+        e.preventDefault();
+
+        var data = new FormData($('#new_image').get(0));
+
+        if (document.getElementById('inputImage').value == 0){
+            // DO NOTHING
+        }else{
+            $.ajax({
+            type: "POST",
+            url: "func_update_profile_image/",
+            data: data,
+            contentType: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            success: function(data){
+                data = JSON.parse(data); // converts string of json to object
+                $('#profile_img').attr("src", data.image_urls);
+                $('#navbar_image').attr("src", data.image_urls);
+                $('#inputImage').val("")
+                Get_user_details();
+            },
+            error: function(data){
+                alert(data)
+            }
+        })
+        }
+    })
+
+    function Get_user_details(){
+        $.ajax({
+            type: "GET",
+            url: "func_get_account_details/",
+            success: function(data){
+                clearBeforeInputs();
+
+                var set_user_name = "<p>" + data.a.Account_name__username + "</p>";
+                $("#disp1 #disp3").append(set_user_name)
+                $('#profile_img').attr("src", data.b)
+                document.getElementById('user_age').value = data.c
+                document.getElementById('user_contact_number').value = data.d
+            },
+            error: function(data){
+                alert(data)
+            }
+        })
+    }
+
+    function clearBeforeInputs(){
+        $("#disp1 #disp3").empty();
+        document.getElementById('user_age').value = ""
+        document.getElementById('user_contact_number').value = ""
+    }
+
+</script>
+
+{% endblock content %}

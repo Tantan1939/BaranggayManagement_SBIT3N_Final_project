@@ -1,0 +1,354 @@
+{% extends 'Health_services/admin_side/main.html' %}
+{% block content %}
+
+<div id="for_approval_requests"> <!-- List of for approval --> </div>
+
+<!-- Accept modal -->
+<div class="modal fade" id="Accept_this_request" tabindex="-1" aria-labelledby="Accept_this_requestLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Do you want to approve this request?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close_accept_request_modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Accept_this_request_form">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for=""> Document Sent: </label><br>
+                        <img src="" alt="" id="approve_document" width="60%">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="acc_user_username" class="form-label"> Username: </label>
+                        <input type="text" class="form-control" name="acc_user_username" id="acc_user_username" readonly>
+                        <input type="hidden" name="accept_this_id" id="accept_this_id">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="acc_Application_date" class="form-label"> Application date: </label>
+                        <input type="text" class="form-control" name="acc_Application_date" id="acc_Application_date" readonly>
+                    </div>
+
+                    <input type="submit" class="btn btn-primary" value="Approve">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_accept_request_modal"> Close </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Decline modal -->
+<div class="modal fade" id="Denied_this_request" tabindex="-1" aria-labelledby="Denied_this_requestLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Do you want to denied this request?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close_decline_request_modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Denied_this_request_form">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for=""> Document Sent: </label><br>
+                        <img src="" alt="" id="disapprove_document" width="60%">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="dis_user_username" class="form-label"> Username: </label>
+                        <input type="text" class="form-control" name="dis_user_username" id="dis_user_username" readonly>
+                        <input type="hidden" name="dis_accept_this_id" id="dis_accept_this_id">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="dis_acc_Application_date" class="form-label"> Application date: </label>
+                        <input type="text" class="form-control" name="dis_acc_Application_date" id="dis_acc_Application_date" readonly>
+                    </div>
+
+                    <input type="submit" class="btn btn-primary" value="Decline">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_decline_request_modal"> Close </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function conv_date(this_date){
+    var conv_this_date = new Date(this_date).toDateString()
+    return conv_this_date;
+}
+
+// Get lists of requests
+function get_lists_of_requests(){
+    $.ajax({
+        type: 'GET',
+        url: '/Health_services/Health_services_superuser/Verification_page/Get_lists_verification_requests/',
+        success: function(data){
+            $("#for_approval_requests").empty();
+            if($.trim(data)){
+                $.each(data, function(key){
+
+                    var Des =
+
+                    "<div class='container-fluid py-4'>"
+                        + "<div class='row'>"
+                            + "<div class='col-12'>"
+                                + "<div class='card mb-4'>"
+                                    + "<div class='card-header pb-0'>"
+                                        + "<h6> Verification Request </h6>"
+                                    + "</div>"
+
+                                + "<div class='card-body px-0 pt-0 pb-2'>"
+                                    + "<div class='table-responsive p-0'>"
+                                        + "<table class='table align-items-center mb-0'>"
+                                            + "<thead>"
+                                                + "<tr>"
+                                                    + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7'>Name</th>"
+                                                    + "<th class='text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7'>Date of Application </th>"
+                                                    + "<th class='text-secondary opacity-7'></th>"
+                                                + "</tr>"
+                                            + "</thead>"
+
+                                            + "<tbody>"
+                                                + "<tr>"
+                                                    + "<td>"
+                                                        + "<div class='d-flex px-2 py-1'>"
+                                                            + "<div>"
+                                                                + "<img src='"+ data[key].User_document +"' class='avatar avatar-sm me-3'>"
+                                                            + "</div>"
+
+                                                                + "<div class='d-flex flex-column justify-content-center'>"
+                                                                    + "<h6 class='mb-0 text-sm'>"
+                                                                        + data[key].user_username
+                                                                    + "</h6>"
+                                                                + "</div>"
+                                                        + "</div>"
+                                                    + "</td>"
+
+                                                    + "<td class='align-middle text-center'>"
+                                                        + "<span class='text-secondary text-xs font-weight-bold'>"
+                                                            + conv_date(data[key].Application_date)
+                                                        + "</span>"
+                                                    + "</td>"
+
+                                                    + "<td class='align-middle'>"
+                                                        + "<button type='button' class='btn btn-link text-dark px-3 mb-0' onclick='AcceptMe("+ data[key].id +")'><i class='fas fa-file-circle-check text-dark me-2' aria-hidden='true'></i> Approve </button>"
+                                                        + "<button type='button' class='btn btn-link text-danger text-gradient px-3 mb-0' onclick='DeniedThis("+ data[key].id +")'> <i class='far fa-file-circle-xmark me-2'></i> Decline </button>"
+                                                    + "</td>"
+
+                                                + "</tr>"
+                                            + "</tbody>"
+
+
+
+
+
+
+                    // var AddMe = "<br> <p> Document </p>"
+                    // + "<img src='"+ data[key].User_document +"' width='20%'> "
+                    // + "<p> Request from: " + data[key].user_username + "</p>"
+                    // + "<p> Date of application: " + conv_date(data[key].Application_date) + "</p>"
+                    // + "<button type='button' onclick='AcceptMe("+ data[key].id +")' class='btn btn-primary'>" + "Approve" + "</button>"
+                    // + "<button type='button' onclick='DeniedThis("+ data[key].id +")' class='btn btn-info'>" + "Decline" + "</button> <br>";
+                    $("#for_approval_requests").append(Des);
+                });
+            }else{
+                 var Des =
+
+                                "<div class='container-fluid py-4'>"
+                                   + "<div class='row'>"
+                                         + "<div class='col-xl-12 col-sm-6 mb-xl-0 mb-4'>"
+                                            + "<div class='card'>"
+                                                + "<div class='card-body p-3'>"
+                                                    + "<div class='row'>"
+                                                        + "<div class='col-xxl-12'>"
+                                                            + "<div class='numbers'>"
+                                                                + "<h5 class='font-weight-bolder'> There are no new request.."
+                                                                + "</h5>"
+                                                            + "</div>"
+                                                        + "</div>"
+                                                    + "</div>"
+                                                + "</div>"
+                                            + "</div>"
+                                        + "</div>"
+                                    + "</div>"
+                                + "</div>"
+                
+                $("#for_approval_requests").append(Des);
+            }
+        },
+        error: function(data){
+            console.log(data);
+        }
+    });
+}
+
+
+// Accept modal FUNCTIONS
+function AcceptMe(id){
+    var urls = '/Health_services/Health_services_superuser/Verification_page/Get_verification_info/' + id;
+    $.ajax({
+        type: 'GET',
+        url: urls,
+        success: function(data){
+            switch(data){
+                case "xExists":
+                    alert('Request no longer exist.');
+                    get_lists_of_requests();
+                    break;
+                default:
+                    clean_accept_modal();
+                    $("#Accept_this_request").modal('show');
+                    $("#approve_document").attr("src", data[0].User_document);
+                    $("#acc_user_username").val(data[0].user_username);
+                    $("#accept_this_id").val(data[0].id);
+                    // $("#acc_Application_date").val((new Date(data[0].Application_date)).toDateString());
+                    $("#acc_Application_date").val(conv_date(data[0].Application_date));
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            get_lists_of_requests();
+        }
+    })
+}
+function clean_accept_modal(){
+    $("#approve_document").attr("src", "");
+    $("#acc_user_username").val("");
+    $("#accept_this_id").val("");
+    $("#acc_Application_date").val("");
+}
+function close_accept_modal(){
+    clean_accept_modal();
+    $("#Accept_this_request").modal('hide');
+}
+
+
+// Decline modal FUNCTIONS
+function DeniedThis(id){
+    var urls = '/Health_services/Health_services_superuser/Verification_page/Get_verification_info/' + id;
+    $.ajax({
+        type: 'GET',
+        url: urls,
+        success: function(data){
+            switch(data){
+                case "xExists":
+                    alert('Request no longer exist.');
+                    get_lists_of_requests();
+                    break;
+                default:
+                    clean_decline_modal();
+                    $("#Denied_this_request").modal('show');
+                    $("#disapprove_document").attr("src", data[0].User_document);
+                    $("#dis_user_username").val(data[0].user_username);
+                    $("#dis_accept_this_id").val(data[0].id);
+                    // $("#dis_acc_Application_date").val(data[0].Application_date);
+                    $("#dis_acc_Application_date").val(conv_date(data[0].Application_date));
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            get_lists_of_requests();
+        }
+    })
+}
+function clean_decline_modal(){
+    $("#disapprove_document").attr("src", "");
+    $("#dis_user_username").val("");
+    $("#dis_accept_this_id").val("");
+    $("#dis_acc_Application_date").val("");
+}
+function close_decline_modal(){
+    clean_decline_modal();
+    $("#Denied_this_request").modal('hide');
+}
+
+
+$(document).ready(function(){
+    get_lists_of_requests();
+
+    $("#close_accept_request_modal").on('click', close_accept_modal);
+    $("#close_decline_request_modal").on('click', close_decline_modal);
+});
+
+$(document).on('submit', '#Accept_this_request_form', function(e){
+    e.preventDefault();
+    var data = new FormData($('#Accept_this_request_form').get(0));
+    $.ajax({
+        type: 'POST',
+        url: '/Health_services/Health_services_superuser/Verification_page/Accept_this_verification_request/',
+        data: data,
+        contentType: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        success: function(data){
+            switch(data){
+                case "xExists":
+                    alert('Request no longer exist.');
+                    close_accept_modal();
+                    get_lists_of_requests();
+                    break;
+                default:
+                    close_accept_modal();
+                    get_lists_of_requests();
+                    break;
+            }
+        },
+        error: function(data){
+            close_accept_modal();
+            get_lists_of_requests();
+            console.log(data);
+        }
+    });
+});
+
+$(document).on('submit', '#Denied_this_request_form', function(e){
+    e.preventDefault();
+    var data = new FormData($('#Denied_this_request_form').get(0));
+    $.ajax({
+        type: 'POST',
+        url: '/Health_services/Health_services_superuser/Verification_page/Decline_this_verification_request/',
+        data: data,
+        contentType: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        success: function(data){
+            switch(data){
+                case "xExists":
+                    alert('Request no longer exist.');
+                    close_decline_modal();
+                    get_lists_of_requests();
+                    break;
+                default:
+                    close_decline_modal();
+                    get_lists_of_requests();
+                    break;
+            }
+        },
+        error: function(data){
+            close_decline_modal();
+            get_lists_of_requests();
+            console.log(data);
+        }
+    });
+});
+
+</script>
+{% endblock content %}

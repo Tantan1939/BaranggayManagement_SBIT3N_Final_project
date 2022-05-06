@@ -1,0 +1,414 @@
+{% extends 'Health_services/admin_side/main.html' %}
+{% block content %}
+
+<style>
+    /* hide arrow in html input type number */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+    }
+</style>
+
+<div id="create_contact">
+    <form method="post" enctype="multipart/form-data" id="add_this_contact">
+        {% csrf_token %}
+        <div id="this_new_contact"> <!-- Set input fields using jquery -->  </div>
+    </form>
+    <div id="trigger_this_btn"><!-- Add button here --></div>
+</div> 
+   
+<div id="display_contact"> 
+    <form method="post" enctype="multipart/form-data" id="update_this_contact">
+        {% csrf_token %}
+        <div id="this_update_form"> <!-- Set input fields using jquery -->  </div>
+    </form>  
+</div>
+
+
+<script>
+
+    // FUNCTIONS to display contact
+    function get_contact(){
+        $.ajax({
+            type: 'GET',
+            url: '/Health_services/Health_services_superuser/Health_center_informations/Get_set_health_center_information/',
+            success: function(data){
+                if($.trim(data)){
+                    display_contact(data);
+                }else{
+                    create_contact();
+                }
+            },
+            error: function(data){
+                console.log(data);
+            }
+        });
+    }
+    function display_contact(has_info){
+        $("#this_new_contact").empty();
+        $("#this_update_form").empty();
+        $("#trigger_this_btn").empty();
+        display_contact_form();
+
+        $("#this_id").val(has_info[0].id);
+        $("#upd_name").val(has_info[0].Name);
+        $("#upd_address").val(has_info[0].Address);
+        $("#upd_contactnum").val( "0" +has_info[0].Contact_number);
+        $("#upd_email").val(has_info[0].Email_address);
+        $("#upd_days").val(has_info[0].Available_days);
+        $("#upd_opentime").val(has_info[0].Open_time);
+        $("#upd_closingtime").val(has_info[0].Close_time);
+
+        if(has_info[0].Open_today){
+            $('input:radio[name=status_today][id='+ "upd_yes" +']').click();
+        }else{
+            $('input:radio[name=status_today][id='+ "upd_no" +']').click();
+        }
+    }
+    function display_contact_form(){
+
+    var Des = 
+     "<div class='container-fluid py-4'>"
+        + "<div class='row my-3'>"
+            + "<div class='col-12'>"
+                + "<div class='card mb-4'>"
+                    + "<div class='card-header pb-0 p-3'>"
+                        + "<div class='row'>"
+                            + "<div class='col-md-8 d-flex align-items-center'>"
+                                + "<h6 class='mb-0'> Health Center Schedule</h6>"
+                                + "</div>"
+                            + "</div>"
+                        + "</div>"
+
+                + "<div class='card-body p-3'>"
+                   + "<div class='row'>"
+
+                        + "<div class='col-md-6'>"
+                            + "<div class='form-group'>"
+                                + "<label for='upd_name'> Center name: </label>"
+                                + "<input type='text' name='upd_name' id='upd_name' class='form-control' required>"
+                                + "<input type='hidden' name='this_id' id='this_id'>"
+                                + "</div>"
+                            + "</div>"
+
+                        + "<div class='col-md-6'>"
+                            + "<div class='form-group'>"
+                                + "<label for='upd_days'> Available days (Ex: Monday-Friday): </label>"
+                                + "<input type='text' name='upd_days' id='upd_days' class='form-control' required>"
+                                + "</div>"
+                            + "</div>"
+
+                        + "</div>"
+
+                    + "<div class='form-group'>"
+                        + "<label for='upd_address'> Center Address: </label>"
+                        + "<input type='text' name='upd_address' id='upd_address' class='form-control' required>"
+                        + "</div>"
+
+
+                    + "<div class='row'>"
+
+                        + "<div class='col-md-6'>"
+                            + "<div class='form-group'>"
+                                + "<label for='upd_contactnum'> Contact number: </label>"
+                                + "<input type='number' name='upd_contactnum' id='upd_contactnum' class='form-control' required>"
+                                + "</div>"
+                            + "</div>"
+
+                        + "<div class='col-md-6'>"
+                            + "<div class='form-group'>"
+                                + "<label for='upd_email'> Email address: </label>"
+                                + "<input type='email' name='upd_email' id='upd_email' class='form-control' required>"
+                                + "</div>"
+                            + "</div>"
+
+                        + "</div>"
+
+                    + "<div class='row'>"
+
+                        + "<div class='col-md-6'>"
+                            + "<div class='form-group'>"
+                                + "<label for='upd_opentime'> Opening time: </label>"
+                                + "<input type='time' name='upd_opentime' id='upd_opentime' class='form-control' required>"
+                                + "</div>"
+                            + "</div>"
+
+                        + "<div class='col-md-6'>"
+                            + "<div class='form-group'>"
+                                + "<label for='upd_closingtime'> Closing time: </label>"
+                                + "<input type='time' name='upd_closingtime' id='upd_closingtime' class='form-control' required>"
+                                + "</div>"
+                            + "</div>"
+
+                        + "</div>"
+
+                    + "<div class='row'>"
+
+                        + "<div class='col-md-6'>"
+                            + "<div class='form-group'>"
+                                + "<label for=''> Open today? </label> &nbsp;"
+
+                                + "<input type='radio' class='form-check-input' name='status_today' id='upd_yes' value='True'>&nbsp;"
+                                + "<label for='upd_yes'> Yes </label> &nbsp;"
+
+                                + "<input type='radio' class='form-check-input' name='status_today' id='upd_no' value='False'>&nbsp;"
+                                + "<label for='upd_no'> No </label> &nbsp;"
+                                + "</div>"
+                            + "</div>"
+
+                        + "</div>"
+
+
+                    + "<div class='row'>"
+
+                        + "<div class='col-md-6'>"
+                            + "<div class='form-group'>"
+                                + "<input type='submit' class='btn bg-gradient-info' value=' Update'>"
+                                + "</div>"
+                            + "</div>"
+
+                        + "</div>"
+                    + "</div>"
+                + "</div>"
+
+            + "</div>"
+
+        + "</div>"
+
+        + "</div>"
+
+
+        $("#this_update_form").append(Des);
+    }
+
+
+    // FUNCTIONS to add contacts
+    function create_contact(){
+        $("#this_new_contact").empty();
+        $("#this_update_form").empty();
+        $("#trigger_this_btn").empty();
+
+            var Des =
+                                "<div class='container-fluid py-4'>"
+                                   + "<div class='row'>"
+                                         + "<div class='col-xl-12 col-sm-6 mb-xl-0 mb-4'>"
+                                            + "<div class='card'>"
+                                                + "<div class='card-body p-3'>"
+                                                    + "<div class='row'>"
+                                                        + "<div class='col-xxl-12'>"
+                                                            + "<div class='numbers'>"
+                                                                + "<h5 class='font-weight-bolder'> You have no list of ongoing services. </h5>"
+                                                                    + "<button class='btn btn-primary' type='button' onclick='display_this_create_form()'> Create now <i class='bi bi-plus-circle'></i> </button>"
+                                                            + "</div>"
+                                                        + "</div>"
+                                                    + "</div>"
+                                                + "</div>"
+                                            + "</div>"
+                                        + "</div>"
+                                    + "</div>"
+                                + "</div>"
+
+        $("#trigger_this_btn").append(Des);
+    }
+    function display_this_create_form(){
+        $("#trigger_this_btn").empty();
+
+        var Des = 
+
+"<div class='container-fluid py-4'>"
+   + "<div class='row my-3'>"
+       + "<div class='col-12'>"
+           + "<div class='card mb-4'>"
+               + "<div class='card-header pb-0 p-3'>"
+                   + "<div class='row'>"
+                       + "<div class='col-md-8 d-flex align-items-center'>"
+                           + "<h6 class='mb-0'> New Schedule</h6>"
+                           + "</div>"
+                       + "</div>"
+                   + "</div>"
+
+           + "<div class='card-body p-3'>"
+              + "<div class='row'>"
+
+                   + "<div class='col-md-6'>"
+                       + "<div class='form-group'>"
+                            + "<label for='add_name'> Center name: </label>"
+                            + "<input type='text' name='add_name' id='add_name' class='form-control' required>"
+                        + "</div>"
+                    + "</div>"
+
+                   + "<div class='col-md-6'>"
+                       + "<div class='form-group'>"
+                        + "<label for='add_days'> Available days (Ex: Monday-Friday): </label>"
+            + "<input type='text' name='add_days' id='add_days' class='form-control' required>"
+                           + "</div>"
+                       + "</div>"
+
+                   + "</div>"
+
+                + "<div class='form-group'>"
+                    + "<label for='add_address'> Center Address: </label>"
+                    + "<input type='text' name='add_address' id='add_address' class='form-control' required>"
+                + "</div>"
+
+
+               + "<div class='row'>"
+
+                   + "<div class='col-md-6'>"
+                       + "<div class='form-group'>"
+                        + "<label for='add_contactnum'> Contact number: </label>"
+            + "<input type='number' name='add_contactnum' id='add_contactnum' class='form-control' required>"
+                           + "</div>"
+                       + "</div>"
+
+                   + "<div class='col-md-6'>"
+                       + "<div class='form-group'>"
+                        + "<label for='add_email'> Email address: </label>"
+            + "<input type='email' name='add_email' id='add_email' class='form-control' required>"
+                           + "</div>"
+                       + "</div>"
+
+                   + "</div>"
+
+               + "<div class='row'>"
+
+                   + "<div class='col-md-6'>"
+                       + "<div class='form-group'>"
+                        + "<label for='add_opentime'> Opening time: </label>"
+            + "<input type='time' name='add_opentime' id='add_opentime' class='form-control' required>"
+                           + "</div>"
+                       + "</div>"
+
+                   + "<div class='col-md-6'>"
+                       + "<div class='form-group'>"
+                        + "<label for='add_closingtime'> Closing time: </label>"
+            + "<input type='time' name='add_closingtime' id='add_closingtime' class='form-control' required>"
+                           + "</div>"
+                       + "</div>"
+
+                   + "</div>"
+
+               + "<div class='row'>"
+
+                   + "<div class='col-md-6'>"
+                       + "<div class='form-group'>"
+                        + "<label for=''> Open today? </label> &nbsp;"
+
+                        + "<input type='radio' class='form-check-input' name='add_status_today' id='add_yes' value='True'>&nbsp;"
+                        + "<label for='add_yes'> Yes </label> &nbsp;"
+
+                        + "<input type='radio' class='form-check-input' name='add_status_today' id='add_no' value='False'>&nbsp;"
+                        + "<label for='add_no'> No </label> &nbsp;"
+                           + "</div>"
+                       + "</div>"
+
+                   + "</div>"
+
+
+               + "<div class='row'>"
+
+                   + "<div class='col-md-6'>"
+                       + "<div class='form-group'>"
+                        + "<input type='submit' class='btn bg-gradient-info' value='Create'>"
+                           + "</div>"
+                       + "</div>"
+
+                   + "</div>"
+               + "</div>"
+           + "</div>"
+
+       + "</div>"
+
+   + "</div>"
+
+   + "</div>"
+
+
+        $("#this_new_contact").append(Des);
+    }
+
+    // FUNCTIONS to update contacts
+    $(document).on('submit', '#update_this_contact', function(e){
+        e.preventDefault();
+
+        var data = new FormData($('#update_this_contact').get(0));
+        $.ajax({
+            type: 'POST',
+            url: '/Health_services/Health_services_superuser/Health_center_informations/Get_set_health_center_information/',
+            data: data,
+            contentType: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            success: function(data){
+                switch(data){
+                    case "xContact":
+                        alert('Invalid contact number! Try again...');
+                        $("#upd_contactnum").val('');
+                        break;
+                    case "xTime":
+                        alert('Incorrect time format. Open time should be less than closing time.');
+                        break;
+                    case "xExist":
+                        alert('Contact no longer exist. Create again.')
+                        get_contact();
+                        break;
+                    case "xEverything":
+                        alert("Save failed! Try again...");
+                        break;
+                    default:
+                        alert('Contact saved.');
+                        get_contact();
+                        break;
+                }
+            },
+            error: function(data){
+                console.log(data);
+                get_contact();
+            }
+        });
+    });
+
+    $(document).on('submit', '#add_this_contact', function(e){
+        e.preventDefault();
+
+        var data = new FormData($('#add_this_contact').get(0));
+        $.ajax({
+            type: 'POST',
+            url: '/Health_services/Health_services_superuser/Health_center_informations/Create_this_information/',
+            data: data,
+            contentType: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            success: function(data){
+                switch(data){
+                    case "xContact":
+                        alert('Invalid contact! Try again...');
+                        $("#add_contactnum").val('');
+                        break;
+                    case "xTime":
+                        alert('Incorrect time format. Open time should be less than closing time.');
+                        break;
+                    case "xEverything":
+                        alert('Save failed! Try again...');
+                        break;
+                    default:
+                        alert('Contact added.')
+                        get_contact();
+                        $("#trigger_this_btn").empty();
+                        break;
+                }
+            },
+            error: function(data){
+                console.log(data);
+                get_contact();
+                $("#trigger_this_btn").empty();
+            }
+        });
+    });
+
+    $(document).ready(function(){
+        get_contact();
+    });
+</script>
+{% endblock content %}

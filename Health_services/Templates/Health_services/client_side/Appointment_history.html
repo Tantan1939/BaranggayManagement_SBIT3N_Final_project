@@ -1,0 +1,845 @@
+{% extends 'Health_services/client_side/Main.html' %}
+{% block content %}
+
+<br>&nbsp;
+<button id="Ongoing_appointments_BTN" class="btn btn-primary"> To Attend </button>
+<button id="Previous_appointments_BTN" class="btn btn-primary"> Previous </button>
+<button id="Cancelled_appointments_BTN" class="btn btn-primary"> Cancelled </button>
+
+
+<!-- Cancel modal SEASONAL-->
+<div class="modal fade" id="Cancel_this_appointment" tabindex="-1" aria-labelledby="Cancel_this_appointmentLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Do you want to cancel this appointment?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close_cancel_modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Cancel_this_appointment_form">
+                    {% csrf_token %}
+
+                    <input type="hidden" name="cancel_this_id" id="cancel_this_id">
+
+                    <div class="mb-3">
+                        <label for="Cancel_this_service" class="form-label"> Service Name: </label>
+                        <input type="text" class="form-control" name="Cancel_this_service" id="Cancel_this_service" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Cancel_Scheduled_date" class="form-label"> Scheduled Date: </label>
+                        <input type="text" class="form-control" name="Cancel_Scheduled_date" id="Cancel_Scheduled_date" readonly>
+                    </div>
+
+                    <input type="submit" class="btn btn-primary" value="Cancel">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_cancel_modal"> Close </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Cancel modal Labtest-->
+<div class="modal fade" id="Cancel_this_appointment_labtest" tabindex="-1" aria-labelledby="Cancel_this_appointment_labtestLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Do you want to cancel this appointment?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close_cancel_modal_labtest"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Cancel_this_appointment_labtest_form">
+                    {% csrf_token %}
+
+                    <input type="hidden" name="cancel_this_id_labtest" id="cancel_this_id_labtest">
+
+                    <div class="mb-3">
+                        <label for="Cancel_this_labtest" class="form-label"> Laboratory Test: </label>
+                        <input type="text" class="form-control" name="Cancel_this_labtest" id="Cancel_this_labtest" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Cancel_Scheduled_date_labtest" class="form-label"> Scheduled Date: </label>
+                        <input type="text" class="form-control" name="Cancel_Scheduled_date_labtest" id="Cancel_Scheduled_date_labtest" readonly>
+                    </div>
+
+                    <input type="submit" class="btn btn-primary" value="Cancel">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_cancel_modal_labtest"> Close </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="Ongoing_appointments"> <!-- Ongoing appointments --> </div>
+<div id="Previous_appointments"> <!-- Previous appointments --> </div>
+<div id="Cancelled_appointments"> <!-- Cancelled appointments --> </div>
+
+<script>
+//Converters
+function convert_fees(fee){
+    if (fee > 0){
+        return "Fees: " + fee
+    }else{
+        return "No fees"
+    }
+}
+
+function convert_date(this_date){
+    var conv_this_date = new Date(this_date).toDateString()
+    return conv_this_date;
+}
+
+
+function get_ongoing_appointments(){
+    $.ajax({
+        type: 'GET',
+        url: '/Health_services/Appointment_history/Get_list_of_ongoing_appointments/',
+        success: function(data){
+            $("#Ongoing_appointments").empty();
+            if ( $.trim(data.ss_ongoing_appointment) || $.trim(data.labtest_ongoing_appointment) ){
+                paste_ongoing_appointments_seasonal(data.ss_ongoing_appointment);
+                paste_ongoing_appointments_labtest(data.labtest_ongoing_appointment);
+            }else{
+                var addMe = " <p> " + " No ongoing appointment. " + " </p> ";
+                $("#Ongoing_appointments").append(addMe);
+            }
+        },
+        error: function(data){
+            $("#Ongoing_appointments").empty();
+            console.log(data);
+            location.reload();
+        }
+    });
+}
+function paste_ongoing_appointments_seasonal(this_data){
+    if ($.trim(this_data)){
+        $.each(this_data, function(key){
+
+            var Des = 
+                "<div class='container-fluid py-4'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Ongoing Appointment </h6>"
+                                + "</div>"
+
+                            + "<div class='card-body px-0 pt-0 pb-2'>"
+                                + "<div class='table-responsive p-0'>"
+                                    + "<table class='table align-items-center mb-0'>"
+                                        + "<thead>"
+                                            + "<tr>"
+                                                + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7'>Health Service</th>"
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date Created</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date of schedule</th>" 
+                                            + "</tr>"
+                                        + "</thead>"    
+
+                                                    + "<tbody>"
+
+                                                        + "<tr>"
+                                                            + "<td>"
+                                                                + "<div class='d-flex px-2 py-1'>"
+                                                                    + "<div>"
+                                                                        + "<img src='"+ this_data[key].Service_image +"' class='avatar avatar-sm me-3'>"
+                                                                    + "</div>"
+                                                                        + "<div class='d-flex flex-column justify-content-center'>"
+                                                                            + "<h6 class='mb-0 text-sm'>"
+                                                                                + this_data[key].Service_type 
+                                                                            + "</h6>"
+                                                                            + "<p class='text-xs text-secondary mb-0'>Beneficiary: "
+                                                                                +  this_data[key].Beneficiary_name 
+                                                                            + "</p>" 
+                                                                        + "</div>"
+                                                                + "</div>"        
+                                                            + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].created) 
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].Appointment_date) 
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td class='align-middle'>" 
+                                                                    + "<button type='button' onclick='CancelThis("+ this_data[key].id + ")' class='btn btn-link pe-3 ps-0 mb-0 ms-auto'> Cancel </button>";
+                                                                + "</td>"
+                                                        + "</tr>"
+                                                    + "</tbody>"
+                                    + "</table>"
+                                + "</div>"
+                            + "</div>"
+                            + "</div>"
+                        + "</div>"
+                    + "</div>"      
+                + "</div>"                    
+
+            // var addMe = 
+            // "<br> <img src='"+ this_data[key].Service_image +"' width='10%' >" + 
+            // " <p> " + this_data[key].Service_type + " </p> " + 
+            // " <p>Recipient: " + this_data[key].Beneficiary_name + " </p> " + 
+            // " <p> Created on " + convert_date(this_data[key].created) + " </p> " +
+            // " <p> You are scheduled on " + convert_date(this_data[key].Appointment_date) + " </p> " +
+            // "&nbsp; <button type='button' onclick='CancelThis("+ this_data[key].id + ")' class='btn btn-secondary'>" + "Cancel" + "</button> <br><br>";
+
+            $("#Ongoing_appointments").append(Des);
+        });
+    }
+}
+function paste_ongoing_appointments_labtest(this_data){
+    if ($.trim(this_data)){
+        $.each(this_data, function(key){
+
+             var Des = 
+                "<div class='container-fluid py-4'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Ongoing Appointment </h6>"
+                                + "</div>"
+
+                            + "<div class='card-body px-0 pt-0 pb-2'>"
+                                + "<div class='table-responsive p-0'>"
+                                    + "<table class='table align-items-center mb-0'>"
+                                        + "<thead>"
+                                            + "<tr>"
+                                                + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7'>Laboratory Test</th>"
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Fee</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date Created</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date of schedule</th>" 
+                                                    
+                                            + "</tr>"
+                                        + "</thead>"    
+
+                                                    + "<tbody>"
+
+                                                        + "<tr>"
+                                                            + "<td>"
+                                                                + "<div class='d-flex px-2 py-1'>"
+                                                                        + "<div class='d-flex flex-column justify-content-center'>"
+                                                                            + "<h6 class='mb-0 text-sm'>"
+                                                                                + this_data[key].Requested_labTest_name 
+                                                                            + "</h6>"
+                                                                            + "<p class='text-xs text-secondary mb-0'>Beneficiary: "
+                                                                                +  this_data[key].Beneficiary_name
+                                                                            + "</p>" 
+                                                                        + "</div>"
+                                                                + "</div>"        
+                                                            + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        +  convert_fees(this_data[key].Requested_labTest_fees) 
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].created)
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].Appointment_date)
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td class='align-middle'>" 
+                                                                    + "<button type='button' onclick='CancelThis_labtest("+ this_data[key].id + ")' class='btn btn-link pe-3 ps-0 mb-0 ms-auto'> Cancel </button>";
+                                                                + "</td>"
+                                                        + "</tr>"
+                                                    + "</tbody>"
+                                    + "</table>"
+                                + "</div>"
+                            + "</div>"
+                            + "</div>"
+                        + "</div>"
+                    + "</div>"      
+                + "</div>"              
+
+            // var addMe = 
+            // " <br> <p> Laboratory Test: " + this_data[key].Requested_labTest_name + " </p> " + 
+            // " <p> " + convert_fees(this_data[key].Requested_labTest_fees) + " </p> " + 
+            // " <p> Patient name: " + this_data[key].Beneficiary_name + " </p> " + 
+            // " <p> Created on " + convert_date(this_data[key].created) + " </p> " +
+            // " <p> You are scheduled on " + convert_date(this_data[key].Appointment_date) + " </p> " +
+            // "&nbsp; <button type='button' onclick='CancelThis_labtest("+ this_data[key].id + ")' class='btn btn-secondary'>" + "Cancel" + "</button> <br><br>";
+
+            $("#Ongoing_appointments").append(Des);
+        });
+    }
+}
+
+
+function get_previous_appointments(){
+    $.ajax({
+        type: 'GET',
+        url: '/Health_services/Appointment_history/Get_list_of_previous_appointment/',
+        success: function(data){
+            $("#Previous_appointments").empty();
+            if ( $.trim(data.ss_previous_appointment) || $.trim(data.labtest_previous_appointment) ){
+                paste_previous_appointments_seasonal(data.ss_previous_appointment);
+                paste_previous_appointments_labtest(data.labtest_previous_appointment);
+            }else{
+                var addMe = " <p> " + " No previous appointment. " + " </p> ";
+                $("#Previous_appointments").append(addMe);
+            }
+        },
+        error: function(data){
+            console.log(data);
+            $("#Previous_appointments").empty();
+            location.reload();
+        }
+    });
+}
+function paste_previous_appointments_seasonal(this_data){
+    if ($.trim(this_data)){
+        $.each(this_data, function(key){
+
+                var Des = 
+                "<div class='container-fluid py-4'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Previous Appointment </h6>"
+                                + "</div>"
+
+                            + "<div class='card-body px-0 pt-0 pb-2'>"
+                                + "<div class='table-responsive p-0'>"
+                                    + "<table class='table align-items-center mb-0'>"
+                                        + "<thead>"
+                                            + "<tr>"
+                                                + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7'>Health Service</th>"
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date Created</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date of schedule</th>" 
+                                            + "</tr>"
+                                        + "</thead>"    
+
+                                                    + "<tbody>"
+
+                                                        + "<tr>"
+                                                            + "<td>"
+                                                                + "<div class='d-flex px-2 py-1'>"
+                                                                    + "<div>"
+                                                                        + "<img src='"+ this_data[key].Service_image  +"' class='avatar avatar-sm me-3'>"
+                                                                    + "</div>"
+                                                                        + "<div class='d-flex flex-column justify-content-center'>"
+                                                                            + "<h6 class='mb-0 text-sm'>"
+                                                                                + this_data[key].Service_type 
+                                                                            + "</h6>"
+                                                                            + "<p class='text-xs text-secondary mb-0'>Beneficiary: "
+                                                                                +  this_data[key].Beneficiary_name
+                                                                            + "</p>" 
+                                                                        + "</div>"
+                                                                + "</div>"        
+                                                            + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].created) 
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].Appointment_date)
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                              
+                                                        + "</tr>"
+                                                    + "</tbody>"
+                                    + "</table>"
+                                + "</div>"
+                            + "</div>"
+                            + "</div>"
+                        + "</div>"
+                    + "</div>"      
+                + "</div>"   
+                
+            // var addMe = 
+            // "<br> <img src='"+ this_data[key].Service_image +"' width='10%' >" + 
+            // " <p> " + this_data[key].Service_type + " </p> " + 
+            // " <p>Recipient: " + this_data[key].Beneficiary_name + " </p> " +
+            // " <p> Created on " + convert_date(this_data[key].created) + " </p> " +
+            // " <p> Attended on " + convert_date(data[key].Appointment_date) + " </p> <br><br>";
+
+            $("#Previous_appointments").append(Des);
+        });
+    }
+}
+function paste_previous_appointments_labtest(this_data){
+    if ($.trim(this_data)){
+        $.each(this_data, function(key){
+
+            var Des = 
+                "<div class='container-fluid py-4'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Previous Appointment </h6>"
+                                + "</div>"
+
+                            + "<div class='card-body px-0 pt-0 pb-2'>"
+                                + "<div class='table-responsive p-0'>"
+                                    + "<table class='table align-items-center mb-0'>"
+                                        + "<thead>"
+                                            + "<tr>"
+                                                + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7'>Laboratory Test</th>"
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Fee</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date Created</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date of schedule</th>" 
+                                                    
+                                            + "</tr>"
+                                        + "</thead>"    
+
+                                                    + "<tbody>"
+
+                                                        + "<tr>"
+                                                            + "<td>"
+                                                                + "<div class='d-flex px-2 py-1'>"
+                                                                        + "<div class='d-flex flex-column justify-content-center'>"
+                                                                            + "<h6 class='mb-0 text-sm'>"
+                                                                                + this_data[key].Requested_labTest_name 
+                                                                            + "</h6>"
+                                                                            + "<p class='text-xs text-secondary mb-0'>Beneficiary: "
+                                                                                +  this_data[key].Beneficiary_name
+                                                                            + "</p>" 
+                                                                        + "</div>"
+                                                                + "</div>"        
+                                                            + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        +  convert_fees(this_data[key].Requested_labTest_fees) 
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].created)
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].Appointment_date)
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                               
+                                                        + "</tr>"
+                                                    + "</tbody>"
+                                    + "</table>"
+                                + "</div>"
+                            + "</div>"
+                            + "</div>"
+                        + "</div>"
+                    + "</div>"      
+                + "</div>";              
+            // var addMe = 
+            // " <br> <p>Laboratory Test: " + this_data[key].Requested_labTest_name + " </p> " + 
+            // " <p> " + convert_fees(this_data[key].Requested_labTest_fees) + " </p> " + 
+            // " <p> Patient name: " + this_data[key].Beneficiary_name + " </p> " + 
+            // " <p> Created on " + convert_date(this_data[key].created) + " </p> " +
+            // " <p> Attended on " + convert_date(this_data[key].Appointment_date) + " </p> <br><br>";
+
+            $("#Previous_appointments").append(Des);
+        });
+    }
+}
+
+
+function get_cancelled_appointments(){
+    $.ajax({
+        type: 'GET',
+        url: '/Health_services/Appointment_history/Get_list_of_cancelled_appointments/',
+        success: function(data){
+            $("#Cancelled_appointments").empty();
+            if ( $.trim(data.ss_cancelled_appointment) || $.trim(data.labtest_cancelled_appointment) ){
+                paste_cancelled_appointments_seasonal(data.ss_cancelled_appointment);
+                paste_cancelled_appointments_labtest(data.labtest_cancelled_appointment);
+            }else{
+                var addMe = " <p> " + " No cancelled appointment. " + " </p> ";
+                $("#Cancelled_appointments").append(addMe);
+            }
+        },
+        error: function(data){
+            console.log(data);
+            $("#Cancelled_appointments").empty();
+            location.reload();
+        }
+    });
+}
+function paste_cancelled_appointments_seasonal(this_data){
+    if ($.trim(this_data)){
+        $.each(this_data, function(key){
+
+            var Des = 
+                "<div class='container-fluid py-4'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Cancelled Appointment </h6>"
+                                + "</div>"
+
+                            + "<div class='card-body px-0 pt-0 pb-2'>"
+                                + "<div class='table-responsive p-0'>"
+                                    + "<table class='table align-items-center mb-0'>"
+                                        + "<thead>"
+                                            + "<tr>"
+                                                + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7'>Health Service</th>"
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date Created</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date of Cancellation</th>" 
+                                            + "</tr>"
+                                        + "</thead>"    
+
+                                                    + "<tbody>"
+
+                                                        + "<tr>"
+                                                            + "<td>"
+                                                                + "<div class='d-flex px-2 py-1'>"
+                                                                    + "<div>"
+                                                                        + "<img src='"+ this_data[key].Service_image  +"' class='avatar avatar-sm me-3'>"
+                                                                    + "</div>"
+                                                                        + "<div class='d-flex flex-column justify-content-center'>"
+                                                                            + "<h6 class='mb-0 text-sm'>"
+                                                                                + this_data[key].Service_type 
+                                                                            + "</h6>"
+                                                                            + "<p class='text-xs text-secondary mb-0'>Beneficiary: "
+                                                                                +  this_data[key].Beneficiary_name
+                                                                            + "</p>" 
+                                                                        + "</div>"
+                                                                + "</div>"        
+                                                            + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].created) 
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].modified)
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                              
+                                                        + "</tr>"
+                                                    + "</tbody>"
+                                    + "</table>"
+                                + "</div>"
+                            + "</div>"
+                            + "</div>"
+                        + "</div>"
+                    + "</div>"      
+                + "</div>"   
+                
+            // var addMe = 
+            // "<br> <img src='"+ this_data[key].Service_image +"' width='10%' >" + 
+            // " <p> " + this_data[key].Service_type + " </p> " + 
+            // " <p>Recipient: " + this_data[key].Beneficiary_name + " </p> " +
+            // " <p> Created on " + convert_date(this_data[key].created) + " </p> " +
+            // " <p> Cancelled on " + convert_date(this_data[key].modified) + " </p> <br><br>";
+
+            $("#Cancelled_appointments").append(Des);
+        });
+    }
+}
+function paste_cancelled_appointments_labtest(this_data){
+    if ($.trim(this_data)){
+        $.each(this_data, function(key){
+
+            var Des = 
+                "<div class='container-fluid py-4'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Cancelled Appointment </h6>"
+                                + "</div>"
+
+                            + "<div class='card-body px-0 pt-0 pb-2'>"
+                                + "<div class='table-responsive p-0'>"
+                                    + "<table class='table align-items-center mb-0'>"
+                                        + "<thead>"
+                                            + "<tr>"
+                                                + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7'>Laboratory Test</th>"
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Fee</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date Created</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Date of schedule</th>" 
+                                                    
+                                            + "</tr>"
+                                        + "</thead>"    
+
+                                                    + "<tbody>"
+
+                                                        + "<tr>"
+                                                            + "<td>"
+                                                                + "<div class='d-flex px-2 py-1'>"
+                                                                        + "<div class='d-flex flex-column justify-content-center'>"
+                                                                            + "<h6 class='mb-0 text-sm'>"
+                                                                                + this_data[key].Requested_labTest_name 
+                                                                            + "</h6>"
+                                                                            + "<p class='text-xs text-secondary mb-0'>Beneficiary: "
+                                                                                +  this_data[key].Beneficiary_name
+                                                                            + "</p>" 
+                                                                        + "</div>"
+                                                                + "</div>"        
+                                                            + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        +  convert_fees(this_data[key].Requested_labTest_fees) 
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].created)
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + convert_date(this_data[key].modified)
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                               
+                                                        + "</tr>"
+                                                    + "</tbody>"
+                                    + "</table>"
+                                + "</div>"
+                            + "</div>"
+                            + "</div>"
+                        + "</div>"
+                    + "</div>"      
+                + "</div>"              
+
+            // var addMe = 
+            // " <br> <p>Laboratory Test: " + this_data[key].Requested_labTest_name + " </p> " + 
+            // " <p> " + convert_fees(this_data[key].Requested_labTest_fees) + " </p> " + 
+            // " <p> Patient name: " + this_data[key].Beneficiary_name + " </p> " + 
+            // " <p> Created on " + convert_date(this_data[key].created) + " </p> " +
+            // " <p> Cancelled on " + convert_date(this_data[key].modified) + " </p> <br><br>";
+
+            $("#Cancelled_appointments").append(Des);
+        });
+    }
+}
+
+
+//Cancel buttons
+function CancelThis(pk){
+    var urls = '/Health_services/Appointment_history/Get_this_health_appointment_info/' + pk;
+    $.ajax({
+        type: 'GET',
+        url: urls,
+        success: function(data){
+            switch(data){
+                case "xExist":
+                    alert('Appointment no longer exist.');
+                    get_ongoing_appointments();
+                    break;
+                default:
+                    clean_cancel_modal();
+                    $("#Cancel_this_appointment").modal('show');
+                    $("#cancel_this_id").val(data[0].id);
+                    $("#Cancel_this_service").val(data[0].Service_type);
+                    $("#Cancel_Scheduled_date").val(convert_date(data[0].Appointment_date));
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            get_ongoing_appointments();
+        }
+    });
+}
+function CancelThis_labtest(pk){
+    var urls = '/Health_services/Get_labtest_request_information/' + pk;
+    $.ajax({
+        type: 'GET',
+        url: urls,
+        success: function(data){
+            switch(data){
+                case "xExist":
+                    alert('Appointment no longer exist.');
+                    get_ongoing_appointments();
+                    break;
+                default:
+                    clean_labtest_modal();
+                    $("#Cancel_this_appointment_labtest").modal('show');
+                    $("#cancel_this_id_labtest").val(data[0].id);
+                    $("#Cancel_this_labtest").val(data[0].Requested_labTest_name);
+                    $("#Cancel_Scheduled_date_labtest").val(convert_date(data[0].Appointment_date));
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            location.reload();
+            get_ongoing_appointments();
+        }
+    });
+}
+
+// Cancel Modal
+function clean_cancel_modal(){
+    $("#cancel_this_id").val('');
+    $("#Cancel_this_service").val('');
+    $("#Cancel_Scheduled_date").val('');
+}
+function close_cancel_modal(){
+    clean_cancel_modal();
+    $("#Cancel_this_appointment").modal('hide');
+}
+function clean_labtest_modal(){
+    $("#cancel_this_id_labtest").val('');
+    $("#Cancel_this_labtest").val('');
+    $("#Cancel_Scheduled_date_labtest").val('');
+}
+function close_labtest_modal(){
+    clean_labtest_modal();
+    $("#Cancel_this_appointment_labtest").modal('hide');
+}
+
+
+// Button FUNCTIONS
+function Ongoing_appointments_BTN_isClick(){
+    $("#Previous_appointments").empty();
+    $("#Cancelled_appointments").empty();
+    get_ongoing_appointments();
+}
+function Previous_appointments_BTN_isClick(){
+    $("#Ongoing_appointments").empty();
+    $("#Cancelled_appointments").empty();
+    get_previous_appointments();
+}
+function Cancelled_appointments_BTN_isClick(){
+    $("#Ongoing_appointments").empty();
+    $("#Previous_appointments").empty();
+    get_cancelled_appointments();
+}
+
+$(document).ready(function(){
+    get_ongoing_appointments();
+
+    $("#Ongoing_appointments_BTN").on('click', Ongoing_appointments_BTN_isClick);
+    $("#Previous_appointments_BTN").on('click', Previous_appointments_BTN_isClick);
+    $("#Cancelled_appointments_BTN").on('click', Cancelled_appointments_BTN_isClick);
+});
+
+$(document).on('submit', '#Cancel_this_appointment_form', function(e){
+    e.preventDefault();
+    var data = new FormData($("#Cancel_this_appointment_form").get(0));
+    $.ajax({
+        type: 'POST',
+        url: '/Health_services/Appointment_history/Cancel_this_health_appointment/',
+        data: data,
+        contentType: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        success: function(data){
+            switch(data){
+                case "xExist":
+                    alert('Appointment no longer exist.');
+                    close_cancel_modal();
+                    get_ongoing_appointments();
+                    break;
+                
+                case "cancelled":
+                    close_cancel_modal();
+                    get_ongoing_appointments();
+                    break;
+
+                default:
+                    close_cancel_modal();
+                    get_ongoing_appointments();
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            close_cancel_modal();
+            get_ongoing_appointments();
+        }
+    });
+});
+
+$(document).on('submit', '#Cancel_this_appointment_labtest_form', function(e){
+    e.preventDefault();
+    var data = new FormData($('#Cancel_this_appointment_labtest_form').get(0));
+    $.ajax({
+        type: 'POST',
+        url: '/Health_services/Cancel_this_labtest_request/',
+        data: data,
+        contentType: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        success: function(data){
+            switch(data){
+                case "success":
+                    close_labtest_modal();
+                    get_ongoing_appointments();
+                    break;
+
+                case "expired":
+                    close_labtest_modal();
+                    get_ongoing_appointments();
+                    break;
+
+                case "xCancelled":
+                    close_labtest_modal();
+                    get_ongoing_appointments();
+                    break;
+                
+                case "xExist":
+                    close_labtest_modal();
+                    get_ongoing_appointments();
+                    break;
+
+                default:
+                    close_labtest_modal();
+                    get_ongoing_appointments();
+                    break;
+
+            }
+        },
+        error: function(data){
+            console.log(data);
+            close_labtest_modal();
+            location.reload();
+        }
+    });
+});
+
+</script>
+
+{% endblock content %}

@@ -1,0 +1,258 @@
+{% extends 'Health_services/client_side/Main.html' %}
+{% block content %}
+
+<div id="list_of_services"> <!-- Display list of seasonal services --> </div>
+
+<!-- Appointment modal -->
+<div class="modal fade" id="Create_this_appointment" tabindex="-1" aria-labelledby="Create_this_appointmentLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Create Appointment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close_add_appointment_modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Create_this_appointment_form">
+                    {% csrf_token %}
+
+                    <input type="hidden" name="Service_type_id" id="Service_type_id">
+
+                    <div class="mb-3">
+                        <label for="Applicant_name" class="form-label"> Beneficiary Name (Beneficiary of this service): </label>
+                        <input type="text" class="form-control" name="Applicant_name" id="Applicant_name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Appointment_date" class="form-label"> Appointment Date: </label>
+                        <input type="date" class="form-control" name="Appointment_date" id="Appointment_date" required>
+                    </div>
+
+                    <input type="submit" class="btn btn-primary" value="Create">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_add_appointment_modal"> Close </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<br>
+<a href="{% url 'Health_services-index' %}" class="btn btn-primary"> Go Back </a>
+
+<script>
+function convert_date(this_date){
+    var conv_this_date = new Date(this_date).toDateString()
+    return conv_this_date;
+}
+
+function convert_time(this_time){
+    const timeString = this_time;
+    // Prepend any date. Use your birthday.
+    const timeString12hr = new Date('1970-01-01T' + timeString + 'Z')
+    .toLocaleTimeString('en-US',
+        {timeZone:'UTC',hour12:true,hour:'numeric',minute:'numeric'}
+    );
+
+    return timeString12hr;
+}
+
+function count_participant(how_many){
+    if (how_many > 0){
+        if (how_many == 1){
+            return how_many + " resident is now participating in this event. Click the button below to avail this service.";
+        }else{
+            return how_many + " residents are now participating in this event. Click the button below to join with them.";
+        }
+    }else{
+        return "As of now, this service have no participant. Click the button below to avail this service.";
+    }
+}
+
+function get_available_health_services(){
+    $.ajax({
+        type: 'GET',
+        url: '/Health_services/Available_health_services/Get_available_health_services/',
+        success: function(data){
+            $("#list_of_services").empty();
+            if ($.trim(data.services)){
+                const d = new Date();
+                const month = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+                var addThis = "<p>" + " Health Services for this month of " + month[d.getMonth()] + "<p>";
+                $("#list_of_services").append(addThis);
+
+                $.each(data.services, function(key){
+                    var addMe = 
+                    " <img src='"+ data.services[key].Image +"' width='20%'> " + 
+                    " <p> " + data.services[key].Title + " </p> " +
+                    " <p> " + data.services[key].Goal + " </p> " + 
+                    " <p> Event will take place in " + data.services[key].Location + " from " + convert_time(data.services[key].Open_time) + " until " + convert_time(data.services[key].Close_time) + " </p> " +
+                    " <p> " + "This service is available until " + convert_date(data.services[key].End_date) + "</p>" + 
+                    "<p>" + count_participant(data.participant[key].entries) + "</p>" +
+                    "<button type='button' onclick='Set_appointment_now("+ data.services[key].id + ")' class='btn btn-secondary'>" + "Avail Now" + "</button> <br><br>";
+                    $("#list_of_services").append(addMe);
+                })
+            }else{
+                var addMe = "<p>" + " There are no list of seasonal services for now. " + "<p>";
+                $("#list_of_services").append(addMe);
+            }
+        },
+        error: function(data){
+            console.log(data);
+        }
+    });
+}
+
+function Set_appointment_now(id){
+    var urls = '/Health_services/Available_health_services/Set_appointment_for_this_seasonal_service/' + id;
+    $.ajax({
+        type: 'GET',
+        url: urls,
+        success: function(data){
+            switch(data){
+                case "xExist":
+                    alert('Service no longer exist.');
+                    get_available_health_services();
+                    break;
+                
+                case "expired":
+                    alert('Service no longer accept appointments.');
+                    get_available_health_services();
+                    break;
+                
+                case "xVerified":
+                    alert('You are not verified user.');
+                    location.href = '/Health_services/Validation/';
+                    break;
+
+                case "newCreate":
+                    get_service_info(id);
+                    break;
+                
+                case "xNewAppointment":
+                    alert('You still have an ongoing appointment in this service.');
+                    break;
+
+                case "addNew":
+                    get_service_info(id);
+                    break;
+
+                default:
+                    alert('You need to login.');
+                    location.href = '/login/';
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            get_available_health_services();
+        }
+    });
+}
+
+
+// Add appointment FUNCTIONS
+function get_service_info(id){
+    var urls = '/Health_services/Available_health_services/Return_this_health_service_info/' + id;
+    $.ajax({
+        type: 'GET',
+        url: urls,
+        success: function(data){
+            clean_Create_this_appointment_modal();
+            switch(data){
+                case "The service no longer exist.":
+                    break;
+                default:
+                    $("#Create_this_appointment").modal('show');
+                    $("#Service_type_id").val(data[0].id);
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            close_Create_this_appointment_modal();
+            get_available_health_services();
+        }
+    });
+}
+function clean_Create_this_appointment_modal(){
+    $("#Service_type_id").val('');
+    $("#Applicant_name").val('');
+    $("#Appointment_date").val('');
+}
+function close_Create_this_appointment_modal(){
+    clean_Create_this_appointment_modal();
+    $("#Create_this_appointment").modal('hide');
+}
+
+
+$(document).ready(function(){
+    get_available_health_services();
+
+    $("#close_add_appointment_modal").on('click', close_Create_this_appointment_modal);
+});
+
+$(document).on('submit', "#Create_this_appointment_form", function(e){
+    e.preventDefault();
+
+    var data = new FormData($("#Create_this_appointment_form").get(0));
+    $.ajax({
+        type: 'POST',
+        url: '/Health_services/Available_health_services/Create_this_health_appointment_request/',
+        data: data,
+        contentType: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        success: function(data){
+            switch(data){
+                case "xExist":
+                    alert('Service no longer exist.');
+                    close_Create_this_appointment_modal();
+                    get_available_health_services();
+                    break;
+
+                case "xFields":
+                    alert('Fill all fields before submitting this form.');
+                    break;
+
+                case "xDate":
+                    alert('Incorrect date. It should greater than or equal to date today.');
+                    break;
+            
+                case "xTime":
+                    alert('This service is close this time. Select other date.');
+                    break;
+                
+                case "Added":
+                    alert('Appointment created.');
+                    close_Create_this_appointment_modal();
+                    get_available_health_services();
+                    location.href = '/Health_services/Appointment_history/';
+                    break;
+
+                case "endDate":
+                    alert('Appointment date exceeds the availability date of the service.');
+                    break;
+                
+                default:
+                    close_Create_this_appointment_modal();
+                    get_available_health_services();
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            close_Create_this_appointment_modal();
+            get_available_health_services();
+        }
+    });
+});
+
+</script>
+
+{% endblock content %}

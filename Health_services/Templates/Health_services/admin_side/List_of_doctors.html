@@ -1,0 +1,611 @@
+{% extends 'Health_services/admin_side/main.html' %}
+
+{% block content %}
+<style>
+    /* hide arrow in html input type number */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+    }
+</style>
+
+<br>&nbsp;
+<button id="View" class="btn btn-primary"> View Doctors </button>
+<button id="Add" class="btn btn-primary"> Add new Doctor </button>
+
+<div id="Display_list_of_doctors"> <!-- Display list of Doctors using jquery --> </div>
+
+
+<div id="Display_add_new_doctors">
+    <div class="container-fluid py-4">
+        <div class="row my-3">
+            <div class="col-12 ">
+                <div class="card  mb-4">
+                    <div class="card-header pb-0 p-3">
+                        <div class="row">
+                            <div class="col-md-8 d-flex align-items-center">
+                                <h6 class="mb-0"> Create Laboratory Test</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-3">
+                    
+                        <form method="post" enctype="multipart/form-data" id="add_doctor">
+                            {% csrf_token %}
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Doc_name"> Doctor Name: </label>
+                                        <input class="form-control" type="text" id="Doc_name" name="Doc_name" required><br>
+                                    </div>
+                                </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="Doc_age"> Age: </label>
+                                            <input class="form-control" type="number" id="Doc_age" name="Doc_age" required><br>
+                                        </div>
+                                    </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Doc_contactnum"> Contact Number: </label>
+                                        <input class="form-control" type="number" id="Doc_contactnum" name="Doc_contactnum" required><br>
+                                    </div>
+                                </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="Specialization"> Specialization </label>
+                                            <select class="form-control" name="Specialization" id="Specialization" class="form-control-sm custom-select">
+
+                                            </select>
+                                        </div>
+                                    </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="submit" value="Add" class="form-control btn bg-gradient-success"><br>
+                                      </div>
+                                </div>
+                            </div>
+                        </form>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Edit Modal -->
+<div class="modal fade" id="showEdit" tabindex="-1" aria-labelledby="showEditLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Update Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeEditModal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Edit_doctor">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <img src="" alt="" id="Doctor_img" width="60%">
+                        <div id="select_img">
+                            <i class="fas fa-camera" id="open_images"></i>
+                            <input type="file" id="uploaded_imgs" name="uploaded_imgs" style="display: none;">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="hidden" name="Doctor_id" id="Doctor_id" value="">
+                        <label for="Doctor_name" class="form-label"> Name: </label>
+                        <input type="text" class="form-control" name="Doctor_name" id="Doctor_name" required><br>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Doctor_age" class="form-label"> Age </label>
+                        <input type="number" class="form-control" id="Doctor_age" name="Doctor_age" onkeypress="event.charCode >= 48" minlength="2" required><br>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Doctor_contactnum"> Contact Number: </label>
+                        <input type="number" class="form-control" id="Doctor_contactnum" name="Doctor_contactnum" onkeypress="event.charCode >= 48" minlength="11" maxlength="13" required><br>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Doctor_Specialization"> Specialization </label>
+                        <select name="Doctor_Specialization" id="Doctor_Specialization" class="form-control-sm custom-select">
+                            <!-- Specialization from jquery -->
+                        </select>
+                    </div>
+                    <input type="submit" class="btn btn-primary" value="Update">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeEditModal"> Close </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="showDelete" tabindex="-1" aria-labelledby="showDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"> Do you want to remove <span class="text-info" id="doctorName"></span> ?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="DelCloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="delete_doctor">
+                    {% csrf_token %}
+                    <input type="hidden" name="DoctorID" value="" id="DoctorID">
+                    <input type="hidden" name="DoctorName" id="DoctorName">
+                    <input type="submit" class="btn btn-primary" value="Delete">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="DelCloseModal"> Close </button>
+                </form>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function get_doctor_lists(){
+        $.ajax({
+            type: 'GET',
+            url: '/Health_services/Health_services_superuser/Doctors/get_list_of_doctors/',
+            success: function(data){
+                $("#Display_list_of_doctors").empty();
+                if(!$.trim(data.getimgs)){
+                    var warning_no_doctors = "<br><p>" + "You have no list of Doctors." + "</p>";
+                    $("#Display_list_of_doctors").append(warning_no_doctors);
+                }else{
+                    $.each(data.getimgs, function(i){
+
+                var Des = 
+
+                "<div class='container-fluid py-4'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Informations </h6>"
+                                + "</div>"
+
+                            + "<div class='card-body px-0 pt-0 pb-2'>"
+                                + "<div class='table-responsive p-0'>"
+                                    + "<table class='table align-items-center mb-0'>"
+                                        + "<thead>"
+                                            + "<tr>"
+                                                + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7'>Name</th>"
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Contact Number</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'></th>" 
+                                            + "</tr>"
+                                        + "</thead>"    
+
+                                                    + "<tbody>"
+
+                                                        + "<tr>"
+                                                            + "<td>"
+                                                                + "<div class='d-flex px-2 py-1'>"
+                                                                    + "<div>"
+                                                                        + "<img src='"+ data.getimgs[i].Picture +"' class='avatar avatar-sm me-3'>"
+                                                                    + "</div>"
+                                                                        + "<div class='d-flex flex-column justify-content-center'>"
+                                                                            + "<h6 class='mb-0 text-sm'>"
+                                                                                + data.getimgs[i].Name
+                                                                            + "</h6>"
+                                                                            + "<p class='text-xs text-secondary mb-0'>Specialization: "
+                                                                                + data.getimgs[i].Specialty
+                                                                            + "</p>" 
+                                                                        + "</div>"
+                                                                + "</div>"        
+                                                            + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + data.getimgs[i].Contact_number
+                                                                    + "</p>"
+                                                                + "</td>"
+
+                                                                + "<td class='align-middle'>" 
+                                                                    + "<button class='btn btn-link pe-3 ps-0 mb-0 ms-auto' value='"+ data.getimgs[i].id +"' onclick='DeleteMe("+ data.getimgs[i].id + " )'><i class='far fa-trash-alt me-2'></i>Delete </button>"
+                                                                    + "<button class='btn btn-link pe-3 ps-0 mb-0 ms-auto' value='"+ data.getimgs[i].id +"' onclick='EditMe("+ data.getimgs[i].id + ")'><i class='fas fa-pencil-alt text-dark me-2  '></i>Edit </button>"
+                                                                    + "<button class='btn btn-link pe-3 ps-0 mb-0 ms-auto' value='"+ data.getimgs[i].id +"' onclick='go_to_credentials_page("+ data.getimgs[i].id + " )'><i class='fas fa-pencil-alt text-dark me-2'></i>Credentials </button>"
+
+                                                                + "</td>"
+                                                        + "</tr>"
+                                                    + "</tbody>"
+                                    + "</table>"
+                                + "</div>"
+                            + "</div>"
+                            + "</div>"
+                        + "</div>"
+                    + "</div>"      
+                + "</div>"                    
+
+
+                        
+                        $("#Display_list_of_doctors").append(Des);
+                    });
+                }
+            },
+            error: function(data){
+                console.log(data);
+            }
+        });
+    }
+
+    var DeleteMe = function(docID){
+        var urls = '/Health_services/Health_services_superuser/Doctors/get_doctor_name_only/' + docID;
+        $.ajax({
+            type: 'GET',
+            url: urls,
+            success: function(data){
+                if (!$.trim(data)){
+                    alert('Doctor no longer exist.');
+                    get_doctor_lists();
+                }else{
+                    $("#doctorName").empty();
+                    $("#showDelete").modal('show');
+                    $("#DoctorID").val(docID)
+                    $("#DoctorName").val(data)
+                    var nameappend = data
+                    $("#doctorName").append(nameappend);
+                }
+            },
+            error: function(data){
+                console.log(data);
+                get_doctor_lists();
+            }
+        })
+    }
+
+    var EditMe = function(docID){
+        urls = '/Health_services/Health_services_superuser/Doctors/get_single_doctor_info/' + docID
+        $.ajax({
+            type: 'GET',
+            url: urls,
+            success: function(data){
+                if (!$.trim(data)){
+                    get_doctor_lists();
+                    alert("Doctor no longer exist.");
+                }else{
+                    clearEditDoctor();
+                    add_specialization_to_editModal();
+                    $('#showEdit').modal('show');
+
+                    $.each(data, function(i){
+                        $("#Doctor_img").attr("src", data[i].Picture)
+                        $("#Doctor_id").val(data[i].id)
+                        $("#Doctor_name").val(data[i].Name)
+                        $("#Doctor_age").val(data[i].Age)
+                        $("#Doctor_contactnum").val("0" + data[i].Contact_number)
+                    });
+                }
+            },
+            error: function(data){
+                get_doctor_lists();
+                console.log(data);
+            }
+        });
+    }
+
+    function closeEditModal(){
+        $("#Doctor_img").attr("src", "")
+        $("#Doctor_name").val("")
+        $("#Doctor_age").val("")
+        $("#Doctor_contactnum").val("")
+        $("#Doctor_Specialization").empty()
+        $("#uploaded_imgs").val("");
+        $("#showEdit").modal('hide')
+    }
+
+    function hide_ViewDoctors(){
+        get_specialization();
+        $("#Display_list_of_doctors").empty();
+        $("#Display_list_of_doctors").hide();
+        $("#Display_add_new_doctors").show();
+    }
+
+    function hide_AddDoctorForm(){
+        get_doctor_lists();
+        $("#Display_list_of_doctors").show();
+        $("#Display_add_new_doctors").hide();
+        $("#Doc_name").val("")
+        $("#Doc_age").val("")
+        $("#Doc_contactnum").val("")
+        $("#Doc_contactnum").val("")
+    }
+
+    function clearDeleteForm(){
+        $("#doctorName").empty();
+        $("#DoctorID").val("");
+        $("#DoctorName").val("")
+        $("#showDelete").modal('hide');
+    }
+
+    function get_specialization(){
+        $.ajax({
+            type: 'GET',
+            url: '/Health_services/Health_services_superuser/Doctors/get_specialization/',
+            success: function(data){
+                if(!$.trim(data.doctor_specialization)){
+                    $("#Specialization").empty();
+                }else{
+                    $("#Specialization").empty();
+
+                    var addZeroValue = "<option value='0'>" + "Choose here..." + "</option>";
+                    $("#Specialization").append(addZeroValue);
+
+                    $.each(data.doctor_specialization, function(i){
+                        var addThere = "<option value='"+ data.doctor_specialization[i].id +"'>" + data.doctor_specialization[i].Title + "</option>";
+                        $("#Specialization").append(addThere);
+                    });
+                }
+            },
+            error: function(data){
+                console.log(data);
+            }
+        });
+    }
+
+    function clearCreateForm(){
+        $("#Doc_name").val("")
+        $("#Doc_age").val("")
+        $("#Doc_contactnum").val("")
+        get_specialization();
+    }
+
+    var clearEditDoctor = function(){
+        $("#Doctor_img").attr("src", "")
+        $("#Doctor_name").val("")
+        $("#Doctor_age").val("")
+        $("#Doctor_contactnum").val("")
+        $("#uploaded_imgs").val("");
+    }
+
+    function add_specialization_to_editModal(){
+        $.ajax({
+            type: 'GET',
+            url: '/Health_services/Health_services_superuser/Doctors/get_all_specialization/',
+            success: function(data){
+                if(!$.trim(data.doctor_specialization)){
+                    $("#Doctor_Specialization").empty();
+                }else{
+                    $("#Doctor_Specialization").empty();
+
+                    var addZeroValue = "<option value='0'>" + "Choose here..." + "</option>";
+                    $("#Doctor_Specialization").append(addZeroValue);
+
+                    $.each(data.doctor_specialization, function(i){
+                        var addThere = "<option value='"+ data.doctor_specialization[i].id +"'>" + data.doctor_specialization[i].Title + "</option>";
+                        $("#Doctor_Specialization").append(addThere);
+                    });
+                }
+            },
+            error: function(data){
+                console.log(data);
+            }
+        });
+    }
+
+    function go_to_credentials_page(pk){
+        var urls = '/Health_services/Health_services_superuser/Doctors/get_doctor_name_only/' + pk;
+        $.ajax({
+            type: 'GET',
+            url: urls,
+            success: function(data){
+                if(!$.trim(data)){
+                    hide_AddDoctorForm();
+                    alert("Doctor no longer exist.");
+                }else{
+                    location.href = '/Health_services/Health_services_superuser/Doctors/Credentials/' + pk;
+                }
+            },
+            error: function(data){
+                console.log(data);
+                get_doctor_lists();
+            }
+        })
+    }
+
+    $(document).ready(function(){
+        hide_AddDoctorForm();
+
+        $("#View").on('click', hide_AddDoctorForm);
+        $("#Add").on('click', hide_ViewDoctors);
+
+        $("#DelCloseModal").on('click', clearDeleteForm);
+        $("#closeEditModal").on('click', closeEditModal);
+
+        $("#open_images").click(function(){
+            $("#uploaded_imgs").trigger('click');
+        });
+
+        $("#uploaded_imgs").change(function () {
+            var ext = $('#uploaded_imgs').val().split('.').pop().toLowerCase();
+            if($.inArray(ext, ['png','jpg','jpeg']) == -1) {
+                $("#uploaded_imgs").val("");
+                $("#Doctor_img").attr("src", "");
+                alert('You can only upload jpg/png file.');
+            }else{
+                const file = this.files[0];
+                if (file) {
+                    let reader = new FileReader();
+                    reader.onload = function (event) {
+                    $("#Doctor_img")
+                    .attr("src", event.target.result);
+                };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+    });
+
+    $(document).on("submit", "#add_doctor", function(e){
+        e.preventDefault();
+        var selectedSpec = $("#Specialization option:selected").val();
+            
+        if (selectedSpec != 0){
+            var data = new FormData($('#add_doctor').get(0));
+            $.ajax({
+                type: 'POST',
+                url: '/Health_services/Health_services_superuser/Doctors/Create_doctor/',
+                data: data,
+                contentType: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    switch(data){
+                        case "xSpec":
+                            get_specialization();
+                            alert("Specialization no longer exist. Try again.")
+                            break;
+
+                        case "exist":
+                            alert("Save Failed! Doctor name already exists.");
+                            $("#Doc_name").val('');
+                            break;
+                        
+                        case "xAge":
+                            alert('Age should not less than 18 and greater than 80! Try again...');
+                            $("#Doc_age").val('');
+                            break;
+                        
+                        case "xCnum":
+                            alert('Invalid contact number! Try again...');
+                            $("#Doc_contactnum").val('');
+                            break;
+
+                        case "xEverything":
+                            get_specialization();
+                            alert("Save failed! You should select a doctor, age and contact number must be an integer. Try again...")
+                            break;
+
+                        default:
+                            clearCreateForm();
+                            alert(data);
+                            break;
+                    }
+                },
+                error: function(data){
+                    clearCreateForm();
+                    console.log(data);
+                }
+            });
+        }
+        else{
+            alert('Select a specialization')
+        }
+    });
+
+    $(document).on("submit", "#delete_doctor", function(e){
+        e.preventDefault();
+        var data = new FormData($('#delete_doctor').get(0));
+        $.ajax({
+            type: 'POST',
+            url: '/Health_services/Health_services_superuser/Doctors/Del_doctor/',
+            data: data,
+            contentType: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            success: function(data){
+                clearDeleteForm();
+                get_doctor_lists();
+                // alert(data);
+            },
+            error: function(data){
+                clearDeleteForm();
+                get_doctor_lists();
+                console.log(data);
+            }
+        });
+    });
+
+    $(document).on("submit", "#Edit_doctor", function(e){
+        e.preventDefault();
+
+        var ext = $('#uploaded_imgs').val().split('.').pop().toLowerCase();
+        var Doctor_Specialization = $("#Doctor_Specialization option:selected").val();
+        var getdocimage = $("#uploaded_imgs")[0].files.length;
+
+        if(($.inArray(ext, ['gif','png','jpg','jpeg']) == -1) && (getdocimage > 0)) {
+            alert('invalid extension!');
+        }
+        else if(Doctor_Specialization == 0){
+            alert('Select a specialization');
+        }else{
+            var data = new FormData($('#Edit_doctor').get(0));
+            $.ajax({
+                type: 'POST',
+                url: '/Health_services/Health_services_superuser/Doctors/update_doctor_info/',
+                data: data,
+                contentType: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    switch(data){
+                        case "xSpec":
+                            alert("Specialization no longer exist. Pick a new one again.")
+                            break;
+
+                        case "xExist":
+                            alert("Doctor no longer exists. Try again.");
+                            closeEditModal();
+                            get_doctor_lists();
+                            break;
+                        
+                        case "xName":
+                            alert("Doctor name already exists. Try again.")
+                            $("#Doctor_name").val("");
+                            break;
+                        
+                        case "xAge":
+                            alert("Age should not less than 18 and greater than 80. Try again...");
+                            $("#Doctor_age").val('');
+                            break;
+
+                        case "xCnum":
+                            alert('Invalid contact number! Try again...');
+                            $("#Doctor_contactnum").val('');
+                            break;
+                        
+                        case "xEverything":
+                            alert("Save failed! You should select a doctor, age and contact number must be an integer. Try again...");
+                            break;
+
+                        default:
+                            //alert(data);
+                            closeEditModal();
+                            get_doctor_lists();
+                            break;
+                    }
+                },
+                error: function(data){
+                    console.log(data);
+                    closeEditModal();
+                    get_doctor_lists();
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock content %}

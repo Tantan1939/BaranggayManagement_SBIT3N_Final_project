@@ -1,0 +1,96 @@
+{% extends 'Health_services/client_side/Main.html' %}
+{% block content %}
+
+<div class="container">
+    <div class="d-flex justify-content-end">
+        <a href="{% url 'Health_services-index' %}"  class="btn btn-primary"><i class="bi bi-plus"></i> Back </a>
+    </div>
+</div>
+
+
+<div class="container-fluid py-4">
+
+<div class="col-md-4">
+    <div class="card">
+      <div class="card-body p-3">
+        <div class="row">
+          <div class="col-7">
+            <div class="numbers">
+                {% if Doctor_profile %}
+
+              <h6 class="font-weight-bolder">
+                Dr. {{Doctor_profile.Name}}
+              </h6>
+                <p> {{Doctor_profile.Age}} years old  </p>
+                <p> Specialized in {{Doctor_profile.Specialty}}   </p>
+                {% else %}
+                    <p> Doctor no longer exist... </p>
+                {% endif %}
+                
+            </div>
+          </div>
+
+            <div class="col-5 text-end my-auto">
+              <div class="avatar avatar-lg text-center border-radius-md icon icon-shape">
+                <img  src="{{Doctor_profile.Picture.url}}">
+              </div>
+            </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row container-fluid py-4">
+    {% if Doctor_credentials %}
+    <h4> Dr. {{Doctor_profile.Name}} Awards </h4>
+    <br>
+    {% for credential in Doctor_credentials %}
+    <div class="col-sm-6">
+        <div class="card mb-4">
+            <div class="card-header pb-0 p-3">
+                <h6 class="mb-1">Projects</h6>
+                <p class="text-sm">Architects design houses</p>
+            </div>
+            
+              <div class="card-body p-3">
+                  <div class="row">
+                      <div class="col-lg-12 col-md-6 mb-xl-0 mb-4">
+                          <div class="card card-blog card-plain">
+                              <div class="position-relative">
+                                  <a class="d-block shadow-xl border-radius-xl">
+                                    <img src="{{credential.Certificate_image.url}}" class="img-fluid shadow border-radius-xl w-auto" >
+                                  </a>
+                              </div>
+                              <div class="card-body px-1 pb-0">
+                                <h6 class="text-gradient text-dark mb-2 text-bolder">{{credential.Title}}</h6>
+                                <a href="javascript:;">
+                                  <h6>
+                                    Modern
+                                  </h6>
+                                </a>
+                                <p class="mb-4 text-sm">
+                                    {{credential.Description}}
+                                </p>
+                                
+                              </div>
+
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+        </div>
+       
+    </div>
+       
+    {% endfor %}
+{% endif %}
+</div>
+
+
+
+    
+{% endblock content %}

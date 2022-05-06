@@ -1,0 +1,352 @@
+{% extends 'Health_services/admin_side/main.html' %}
+
+{% block stylesheets %}{% endblock stylesheets %}
+
+
+{% block content %}
+
+<div class="container-fluid py-4">
+    <p> Appointment Lists </p>
+    <button id="LTR" class="btn btn-outline-info btn-sm mb-0"> Laboratory Test Requests </button>
+    <button id="SHSR" class="btn btn-outline-info btn-sm mb-0"> Seasonal Health service requests </button>
+</div>
+
+<div id="labtest">
+    {% if incoming_LabTest_request or previous_LabTest_request %}
+    {% if incoming_LabTest_request %}
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+
+                    <div class="card-header pb-0">
+                        <div class="row">
+                            <div class="col-md-6 d-flex align-items-center">
+                                <h6 class="mb-0">
+                                    Laboratory Test
+                                </h6>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <a href="{% url 'Health_services_superuser-generate_labtest_copies' %}"
+                                    class="btn bg-gradient-dark mb-0">
+                                    <i class="fas fa-file-pdf text-sm me-0">
+                                        Generate PDF copy
+                                    </i>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Status</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Username</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Patient Name</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Lab Test</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Fees</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Appointment Date</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Created Date</th>
+                                    </tr>
+                                </thead>
+
+                                {% for obj in incoming_LabTest_request %}
+
+                                <tbody>
+                                    <tr>
+                                        <td class="align-middle text-center text-sm">
+                                            <span class="badge badge-sm bg-gradient-secondary">
+                                                Ongoing
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.Name__username}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.Beneficiary_name}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.Requested_labTest__Title}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.Requested_labTest__Fees}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.Appointment_date}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.created}}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+
+                                    {% for obj in previous_LabTest_request %}
+
+                                    <tr>
+                                        <td class="align-middle text-center text-sm">
+                                            <span class="badge badge-sm bg-gradient-success">
+                                                Done
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.Name__username}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.Beneficiary_name}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.Requested_labTest__Title}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.Requested_labTest__Fees}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.Appointment_date}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs-font-weight-bold">
+                                                {{obj.created}}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+                            {% else %}
+                            <div class="container-fluid py-4">
+                                <div class="row">
+                                    <div class="col-xl-12 col-sm-6 mb-xl-0 mb-4">
+                                        <div class="card">
+                                            <div class="card-body p-3">
+                                                <div class="row">
+                                                    <div class="col-xxl-12">
+                                                        <div class="numbers">
+                                                            <h5 class="font-weight-bolder">
+                                                                You have no Lab-Test appointment here...
+                                                            </h5>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="seasonal">
+    {% if incoming_SeasonalServices_request or previous_SeasonalServices_request %}
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+    
+                    <div class="card-header pb-0">
+                        <div class="row">
+                            <div class="col-md-6 d-flex align-items-center">
+                                <h6 class="mb-0">
+                                    Laboratory Test
+                                </h6>
+                            </div>
+                            <div class="col md-6 text-right">
+                            {% if incoming_SeasonalServices_request %}
+
+                                <a href="{% url 'Health_services_superuser-Generate_seasonal_requests_copies' %}" class="btn bg-gradient-dark mb-0">
+                                    <i class="fas fa-file-pdf text-sm me-0">
+                                        Generate PDF copy
+                                    </i>
+                                </a>
+                                {% endif %}
+    
+                            </div>
+                        </div>      
+                    </div>
+    
+                        <div class="card-body px-0 pt-0 pb-2">
+                            <div class="table-responsive p-0">
+                                <table class="table align-items-center mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Username</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Patient Name</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Service Type</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Appointment Date</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Created Date</th>
+                                        </tr>
+                                    </thead>
+    
+                                    {% for obj in incoming_SeasonalServices_request %}
+                                  
+                                    <tbody>
+                                        <tr>
+                                                <td class="align-middle text-center text-sm">
+                                                    <span class="badge badge-sm bg-gradient-secondary">
+                                                        Ongoing
+                                                    </span>
+                                                </td>
+                                            <td> 
+                                                <span class="text-secondary text-xs-font-weight-bold">
+                                                    {{obj.Name__username}}
+                                                </span>
+                                            </td>
+                                            <td > 
+                                                <span class="text-secondary text-xs-font-weight-bold">
+                                                    {{obj.Beneficiary_name}}
+                                                </span>
+                                            </td>
+                                            <td > 
+                                                <span class="text-secondary text-xs-font-weight-bold">
+                                                    {{obj.Service_type__Title}}
+                                                </span>
+                                            </td>
+                                            <td > 
+                                                <span class="text-secondary text-xs-font-weight-bold">
+                                                    {{obj.Appointment_date}}
+                                                </span>
+                                            </td>
+                                            <td > 
+                                                <span class="text-secondary text-xs-font-weight-bold">
+                                                    {{obj.created}}
+                                                </span>
+                                            </td>
+                                        </tr>
+
+                                        {% endfor %}
+
+                                        {% for obj in previous_SeasonalServices_request %}
+    
+                                        <tr>
+                                            <td class="align-middle text-center text-sm">
+                                                    <span class="badge badge-sm bg-gradient-success">
+                                                        Done
+                                                    </span>
+                                            </td>
+                                            <td> 
+                                                <span class="text-secondary text-xs-font-weight-bold">
+                                                    {{obj.Name__username}}
+                                                </span>
+                                            </td>
+                                            <td> 
+                                                <span class="text-secondary text-xs-font-weight-bold">
+                                                    {{obj.Beneficiary_name}}
+                                                </span>
+                                            </td>
+                                            <td> 
+                                                <span class="text-secondary text-xs-font-weight-bold">
+                                                 {{obj.Service_type__Title}}
+                                                </span>
+                                            </td>
+                                            <td> 
+                                                <span class="text-secondary text-xs-font-weight-bold">
+                                                    {{obj.Appointment_date}}
+                                                </span>
+                                            </td>
+                                            <td> 
+                                                <span class="text-secondary text-xs-font-weight-bold">
+                                                    {{obj.created}}
+                                                </span>
+                                            </td>
+                                           
+                                        </tr>
+                                        {% endfor %} 
+    
+                                    </tbody>
+                               
+                                </table>
+                                {% else %}
+                                <div class="container-fluid py-4">
+                                    <div class="row">
+                                        <div class="col-xl-12 col-sm-6 mb-xl-0 mb-4">
+                                            <div class="card">
+                                                <div class="card-body p-3">
+                                                    <div class="row">
+                                                        <div class="col-xxl-12">
+                                                            <div class="numbers">
+                                                                <h5 class="font-weight-bolder">
+                                                                    You have no Health service appointment...
+                                                                </h5>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+    
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var hidelabtest = function () {
+                $("#labtest").hide();
+                $("#seasonal").show();
+            }
+
+            var hideSeasonal = function () {
+                $("#labtest").show();
+                $("#seasonal").hide();
+            }
+
+            hideSeasonal();
+
+            $("#LTR").on('click', hideSeasonal);
+            $("#SHSR").on('click', hidelabtest);
+        });
+    </script>
+
+    {% endblock content %}

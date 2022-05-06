@@ -1,0 +1,9 @@
+Appointment_system = Arnaiz
+
+Brgy_document_issuance = Blanco
+
+Brgy_report_generation = Gulagula
+
+Health_services = Tan
+
+Record_management = Sillano

@@ -1,0 +1,513 @@
+{% extends 'Health_services/client_side/Main.html' %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+
+{% block content %}
+
+<div class="container-fluid py-4">
+      
+<div class="row">
+      <div class="col-lg-7 mb-lg-0 mb-4">
+        <div class="card">
+          <div class="card-body p-3">
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="d-flex flex-column h-100">
+              {% if get_contact_information %}
+                 
+                  <p class="text-lg mb-1 pt-2 text-bold">{{get_contact_information.Address}}</p>
+                  <h4 class="font-weight-bolder">{{get_contact_information.Name}} Health Service {{year.year}} </h4>
+                  <p class="mb-5"> Our mission is to improve the health of those we serve with a commitment to excellence in all that we do. </p>
+              {% else %}
+                  <h3> Baranggay <span class="text-info">
+                      Health Service
+                  </span> for {{year.year}} <!-- Display the current year --> </h3>
+
+                  <p class="text-lg mb-1 pt-2 text-bold">{{get_contact_information.Address}}</p>
+                  <h4 class="font-weight-bolder">Baranggay Health Service {{year.year}} </h4>
+                  <p class="mb-5"> Our mission is to improve the health of those we serve with a commitment to excellence in all that we do. </p>
+              {% endif %}
+                  
+                </div>
+              </div>
+              <div class="col-lg-5 ms-auto text-center mt-5 mt-lg-0">
+                <div class="bg-gradient-faded-white border-radius-lg h-100">
+                  <img src="/static/health_services/admin/assets/img/shapes/waves-white.svg" class="position-absolute h-100 w-50 top-0 d-lg-block d-none" alt="waves">
+                  <div class="position-relative d-flex align-items-center justify-content-center h-100">
+                    <img class="w-100 position-relative z-index-2 pt-4" src="/Media/hospital.png">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card h-100">
+          <div class="overflow-hidden position-relative border-radius-xl bg-cover h-100" style="background-image: url('/Media/DENTAL-CLINICS-1200x720.png');">
+            <span class="mask bg-gradient-dark"></span>
+            <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+              {% if health_center_is_open %}
+              <h5 class="text-white font-weight-bolder mb-4 pt-2">Open Every {{health_center_is_open.Available_days}}, {{health_center_is_open.Open_time}} until {{health_center_is_open.Close_time}} </h5>
+              <p class="text-white">Our goal is to offer quality care and services that set community standards, exceed patients' 
+                expectations and are provided in a caring, convenient, cost-effective and accessible manner.</p>
+                  {% if get_seasonal_service %}
+                  <a href="{% url 'Health_services-Available_Health_service' %}" class="text-white text-sm font-weight-bold mb-0 icon-move-right mt-auto" href="javascript:;">
+                    Avail Now
+                    <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+                  </a>
+                  {% endif %}
+
+              {% else %}
+              <h5 class="text-white font-weight-bolder mb-4 pt-2">Health center is close Today </h5>
+
+              {% endif %}
+
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+
+<div id="freecheckup_doctors" class=" container-fluid py-5 row">      
+   <!-- Display list of assigned doctors in free checkup --> 
+</div>
+   
+
+           
+<div class="container-fluid py-4">
+  <div id="laboratory_test_list"> <!-- Display list of laboratory Tests --> </div>
+</div>
+
+
+<!-- Appointment modal -->
+<div class="modal fade" id="Create_this_appointment" tabindex="-1" aria-labelledby="Create_this_appointmentLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Create Appointment</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close_add_appointment_modal"></button>
+          </div>
+
+          <div class="modal-body">
+              <p class="lead"></p>
+              <form method="post" enctype="multipart/form-data" id="Create_this_appointment_form">
+                  {% csrf_token %}
+
+                  <input type="hidden" name="labtest_id" id="labtest_id">
+
+                  <div class="mb-3">
+                      <label for="Beneficiary_name" class="form-label"> Patient Name: </label>
+                      <input type="text" class="form-control" name="Beneficiary_name" id="Beneficiary_name" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="Appointment_date" class="form-label"> Appointment Date: </label>
+                      <input type="date" class="form-control" name="Appointment_date" id="Appointment_date" required>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="chosen_labtest" class="form-label"> Laboratory Test: </label>
+                      <input type="text" class="form-control" name="chosen_labtest" id="chosen_labtest" readonly>
+                  </div>
+
+                  <input type="submit" class="btn btn-primary" value="Create">
+              </form>
+          </div>
+
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_add_appointment_modal"> Close </button>
+          </div>
+
+      </div>
+  </div>
+</div>
+
+
+
+<div id="donate_here" class=" container-fluid py-5 row">
+  <h4> Support Our Community Service through Donation </h4>
+  <br>
+  {% if get_donation_infos %}
+      {% for obj in get_donation_infos %}
+       <div class="col-xl-4 mb-xl-0 mb-4">
+         <div class="card bg-transparent shadow-xl">
+          <div class="overflow-hidden position-relative border-radius-xl" style="background-image: url('/static/assets/img/curved-images/curved14.jpg')">
+            <span class="mask bg-gradient-dark"></span>
+            <div class="card-body position-relative z-index-1 p-3">
+              <div class="ms-auto w-20 d-flex align-items-end justify-content-end">
+                <img class="w-60 mt-2" src="/static/health_services/admin/assets/img/logos/mastercard.png" alt="logo">
+              </div>
+              <h5 class="text-white mt-4 mb-5">{{obj.Account_number}}</h5>
+              <div class="d-flex">
+                <div class="d-flex">
+                  <div class="me-4">
+                    <p class="text-white text-sm opacity-8 mb-0">Card Holder</p>
+                    <h6 class="text-white mb-0">{{obj.Account_name}}</h6>
+                  </div>
+                  <div>
+                    <p class="text-white text-sm opacity-8 mb-0">Expires</p>
+                    <h6 class="text-white mb-0">11/22</h6>
+                  </div>
+                </div>
+                <div class="ms-auto w-20 d-flex text-white align-items-end justify-content-end">
+                  {{obj.Bank}}
+                </div>
+              </div>
+             
+            </div>
+           
+          </div>
+         
+         </div>
+       </div>
+    
+      {% endfor %}
+  {% else %}
+      <p> There's no donation info yet. </p>
+  {% endif %}
+</div>
+     
+
+{% include "Health_services/client_side/Footer.html" %}
+
+</div>
+
+
+
+<script>
+trim_description = function(str, length, ending) {
+  if (length == null) {
+      length = 100;
+  }
+  if (ending == null) {
+      ending = '...';
+  }
+  if (str.length > length) {
+      return str.substring(0, length - ending.length) + ending;
+  }
+  else{
+      return str;
+  }
+};
+
+function convert_fees(fee){
+  if (fee > 0){
+      return "Fee: " + fee
+  }else{
+      return "No Fees Required"
+  }
+}
+
+function get_list_freecheckup_doctors(){
+  $.ajax({
+      type: 'GET',
+      url: '/Health_services/Health_service_get_freecheckup_assigned_doctors/',
+      success: function(data){
+          $("#freecheckup_doctors").empty();
+
+          if($.trim(data)){
+              var addThis = "<h6>" + "Free checkup doctors" + "</h6>";
+              $("#freecheckup_doctors").append(addThis);
+
+              $.each(data, function(key){
+                var Des = 
+
+                "<div class='col-md-3'>"
+                  + "<div class='card'>"
+                    + "<div class='card-body p-3'>"
+                      + "<div class='row'>"
+                        + "<div class='col-7'>"
+                          + "<div class='numbers'>"
+                            + "<h6 class='font-weight-bolder'>"
+                              + data[key].Assigned_doctor_name
+                            + "</h6>"
+                              + "<p> Specialized in "
+                                + data[key].Assigned_doctor_Specialty
+                              + "</p>"
+                                + "<a onclick='FullDetails("+ data[key].Assigned_doctor_id + ")' class=' text-dark text-sm font-weight-bold mb-0 icon-move-right mt-auto'>"
+                                  + "Full Details"
+                                    + "<i class='fas fa-arrow-right text-sm ms-1'> </i>"
+                                + "</a>"
+                          + "</div>"
+                        + "</div>"
+
+                          + "<div class='col-5 text-end my-auto'>"
+                            + "<div class='avatar avatar-lg text-center border-radius-md icon icon-shape'>"
+                              + "<img  src='"+ data[key].Assigned_doctor_Picture +"'>"
+                            + "</div>"
+                          + "</div>"
+
+                      + "</div>"
+                    + "</div>"
+                  + "</div>"
+                + "</div>";
+                  
+                $("#freecheckup_doctors").append(Des);
+                
+              });
+          }else{
+              var addMe = "<p>" + " Free check up is not available for now. " + "</p>";
+              $("#freecheckup_doctors").append(addMe);
+          }
+
+      },
+      error: function(data){
+          console.log(data);
+      }
+  });
+}
+
+function get_list_of_laboratory_tests(){
+  $.ajax({
+      type: 'GET',
+      url: '/Health_services/Index_get_list_of_Labtests/',
+      success: function(data){
+          $("#laboratory_test_list").empty();
+
+          if($.trim(data)){
+              var addThis = "<h2>" + "Laboratory Tests" + "</h2>";
+              $("#laboratory_test_list").append(addThis);
+              $.each(data, function(key){
+
+                  if (data[key].Need_appointment){
+
+                    var Des = 
+                            "<ul class='list-group'>"
+                                + " <li class='list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg'>"
+                                    + "<div class='d-flex flex-column'>"
+                                        + "<h6 class='mb-3 text-sm'>Diagnosis</h6>"
+                                            + " <span class='mb-2 text-xs'>Test Name: <span class='text-dark font-weight-bold ms-2'>"
+                                                + data[key].Title
+                                                    + "</span></span>"
+
+                                                + "<span class='mb-2 text-xs'>Description: <span class='text-dark ms-2 font-weight-bold'>"
+                                                    +  trim_description(data[key].Description, 110)
+                                                        + "</span></span>"
+
+                                                    + "<span class='mb-2 text-xs'>Fee: <span class='text-dark ms-2 font-weight-bold'>"
+                                                        + convert_fees(data[key].Fees) 
+                                                                + "</span></span>"
+
+                                                              
+                                    + "</div>"
+                                        + "<div class='ms-auto'>"
+                                          + "<button type='button' onclick='Set_labtest_appointment("+ data[key].id + ")' class='btn btn-link text-dark px-3 mb-0'> <i class='fas fa-pen-square me-2'></i> Set Appointment  </button>"
+                                        + "</div>"
+                                + "</li>"
+                            + "</ul>";
+
+                      $("#laboratory_test_list").append(Des);
+                  }else{
+                        var Des = 
+
+                            "<ul class='list-group'>"
+                                    + " <li class='list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg'>"
+                                        + "<div class='d-flex flex-column'>"
+                                            + "<h6 class='mb-3 text-sm'>Diagnosis</h6>"
+                                                + " <span class='mb-2 text-xs'>Diagnose with: <span class='text-dark font-weight-bold ms-2'>"
+                                                    + data[key].Title
+                                                        + "</span></span>"
+
+                                                    + "<span class='mb-2 text-xs'>Description: <span class='text-dark ms-2 font-weight-bold'>"
+                                                        + trim_description(data[key].Description, 110)
+                                                            + "</span></span>"
+
+                                                        + "<span class='mb-2 text-xs'>Fee: <span class='text-dark ms-2 font-weight-bold'>"
+                                                            +  convert_fees(data[key].Fees)
+                                                                    + "</span></span>"
+
+                                                                    + "<span class='mb-2 text-xs'>Status: <span class='text-dark ms-2 font-weight-bold'>"
+                                                                        + " No Appointment is Required "
+                                                                            + "</span></span>"
+                                        + "</div>"
+                                           
+                                    + "</li>"
+                                + "</ul>";
+                      // var addMe =
+                      // "<p>Test name: " + data[key].Title + "</p>" +
+                      // "<p>What is it? " + trim_description(data[key].Description, 150) + "</p>" +
+                      // "<p>" + convert_fees(data[key].Fees) + "</p>" +
+                      // "<p>No appointment required" + "</p> <br>"
+                      $("#laboratory_test_list").append(Des);
+                  }
+
+              });
+          }else{
+              $("#laboratory_test_list").empty();
+          }
+
+      },
+      error: function(data){
+          console.log(data);
+      }
+  });
+}
+
+function FullDetails(pk){
+  location.href = '/Health_services/Doctor_profile_and_credentials/' + pk;
+}
+
+function Set_labtest_appointment(id){
+  var urls = '/Health_services/Verify_in_lab_test/' + id;
+
+  $.ajax({
+      type: 'GET',
+      url: urls,
+      success: function(data){
+          if (data == "xVerified"){
+              alert('Your account is not verified to avail free labtest.');
+              location.href = '/Health_services/Validation/';
+          }
+          else if(data == "xLab"){
+              alert('Labtest no longer exist.');
+              location.reload();
+          }
+          else if(data == "xAppointment"){
+              alert('This labtest no longer requires an appointment.');
+              location.reload();
+          }
+          else if(data == "continue"){
+              lab_test_getinfo(id);
+          }
+          else if(data == "xNewAppointment"){
+              alert('You have an ongoing appointment in this labtest.');
+          }
+          else{
+              alert('Login your account!');
+              location.href = '/login/';
+          }
+
+      },
+      error: function(data){
+          console.log(data);
+          location.reload();
+      }
+  })
+}
+
+
+//Labtest appointment FUNCTIONS
+function lab_test_getinfo(pk){
+  var urls = '/Health_services/Get_labtest_information/' + pk;
+  $.ajax({
+      type: 'GET',
+      url: urls,
+      success: function(data){
+          if ($.trim(data)){
+              clean_labtest_appointment_modal();
+              $("#Create_this_appointment").modal('show');
+              $("#labtest_id").val(data[0].id);
+              $("#chosen_labtest").val(data[0].Title);
+          }else{
+              location.reload();
+          }
+      },
+      error: function(data){
+          console.log(data);
+          location.reload();
+      }
+  });
+}
+function clean_labtest_appointment_modal(){
+  $("#labtest_id").val('');
+  $("#Beneficiary_name").val('');
+  $("#Appointment_date").val('');
+  $("#chosen_labtest").val('');
+}
+function close_labtest_appointment_modal(){
+  clean_labtest_appointment_modal();
+  $("#Create_this_appointment").modal('hide');
+}
+
+
+$(document).ready(function(){
+
+  get_list_freecheckup_doctors();
+  get_list_of_laboratory_tests();
+
+  $("#close_add_appointment_modal").on('click', close_labtest_appointment_modal);
+});
+
+$(document).on('submit', '#Create_this_appointment_form', function(e){
+  e.preventDefault();
+  var data = new FormData($('#Create_this_appointment_form').get(0));
+  $.ajax({
+      type: 'POST',
+      url: '/Health_services/Create_labtest_appointment_byClient/',
+      data: data,
+      contentType: 'multipart/form-data',
+      processData: false,
+      contentType: false,
+      success: function(data){
+          switch(data){
+              case "xExist":
+                  alert('Laboratory Test no longer exist.');
+                  close_labtest_appointment_modal();
+                  location.reload();
+                  break;
+
+              case "DuplicateAppointment":
+                  alert('You still have an appointment in this laboratory test.');
+                  close_labtest_appointment_modal();
+                  break;
+
+              case "xAppointment":
+                  alert('Laboratory Test no longer required an appointment.');
+                  close_labtest_appointment_modal();
+                  location.reload();
+                  break;
+
+              case "xDateAppointment":
+                  alert('Appointment date should not less than date today.');
+                  break;
+
+              case "xVerified":
+                  alert('Your account is not verified to avail free labtest.');
+                  close_labtest_appointment_modal();
+                  location.href = '/Health_services/Validation/';
+                  break;
+
+              case "created":
+                  alert('Appointment Created Successfully.');
+                  close_labtest_appointment_modal();
+                  location.href = '/Health_services/Appointment_history/';
+                  break;
+
+              case "xTime":
+                    alert('Health center is closed at this time. Find another date.');
+                    break;
+
+              case "hClose":
+                    alert('Health center is closed today. Change your schedule.');
+                    break;
+
+              default:
+                    close_labtest_appointment_modal();
+                    location.reload();
+                    break;
+
+          }
+      },
+      error: function(data){
+          console.log(data);
+          close_labtest_appointment_modal();
+          location.reload();
+      }
+  });
+});
+
+</script>
+
+
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}
+
+
+{% endblock javascripts %}

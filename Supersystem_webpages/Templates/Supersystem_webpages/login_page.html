@@ -1,0 +1,77 @@
+{% extends 'Supersystem_webpages/client_side/main.html' %}
+{% load static %}
+
+{% block content %}
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+
+<div id="Login">
+    <!-- Sign in form -->
+    <section class="signup" id="signup">
+     <div class="container-signup">
+         <div class="signup-content">
+             <div class="signup-form">
+                 <h2 class="form-title-signup">Sign up</h2>
+                 <form method="POST" class="register-form" id="login-form">
+                     {% csrf_token %}
+                     <div class="form-group">
+                         <label for="name"><i class="zmdi zmdi-account material-icons-name"></i></label>
+                         <input type="text" name="name" id="username" placeholder="Username"/>
+                     </div>
+                  
+                     <div class="form-group">
+                         <label for="pass"><i class="zmdi zmdi-lock"></i></label>
+                         <input type="password" name="pass" id="password" placeholder="Password"/>
+                     </div>
+                    
+                    
+                     <div class="form-group form-button">
+                         <input type="submit" name="signup"  class="form-submit" value="Login"/>
+                     </div>
+                 </form>
+             </div>
+             <div class="signup-image">
+                 <figure><img src="{% static '/Login/images/signin-image.jpg' %}" alt="sing up image"></figure>
+              
+             </div>
+         </div>
+     </div>
+ </section>
+</div>
+
+<script type="text/javascript">
+    $(document).on("submit", '#login-form', function(e){
+        e.preventDefault();
+
+        var username = $("#username").val()
+        var password = $("#password").val()
+
+        if (username == "" || password == ""){
+            alert("Fill all fields.")
+        }else{
+            $.ajax({
+                type: 'POST',
+                url: '/login/',
+                data:{
+                    username, password, csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                },
+                success: function(data){
+                    switch(data){
+                        case "incorrect":
+                            alert('Incorrect username or password')
+                            break;
+                        case "client_index":
+                            location.href = '/';
+                            break;
+                        case "admin_index":
+                            location.href = '/superuser/';
+                            break;
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock content %}

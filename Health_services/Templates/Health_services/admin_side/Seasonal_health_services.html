@@ -1,0 +1,1101 @@
+{% extends 'Health_services/admin_side/main.html' %}
+{% block content %}
+
+<br>&nbsp;
+<button class="btn btn-primary" id="create_service"><i class="bi bi-plus"></i> Add Service </button>
+<button class="btn btn-primary" id="ongoing_services"><i class="bi bi-lightning"></i> Ongoing </button>
+<button class="btn btn-primary" id="future_services"><i class="bi bi-arrow-up-circle"></i> Future services </button>
+<button class="btn btn-primary" id="previous_services"><i class="bi bi-arrow-90deg-left"></i> Previous </button>
+
+
+<div id="list_of_previous_services"> <!-- Add list of previous service using JQUERY --> </div>
+<div id="list_of_ongoing_services"> <!-- Add list of ongoing service using JQUERY --> </div>
+<div id="list_of_future_services"> <!-- Add list of future service using JQUERY --> </div>
+
+<!-- Add service modal -->
+<div class="modal fade" id="Add_this_service" tabindex="-1" aria-labelledby="Add_this_serviceLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Service Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close_service_modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Add_this_service_form">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <img src="" alt="" id="service_img_preview" width="60%">
+                        <div id="select_img">
+                            <i class="fas fa-camera" id="open_images"></i>
+                            <input type="file" id="service_img" name="service_img" style="display: none;">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Service_name" class="form-label"> Service name: </label>
+                        <input type="text" class="form-control" name="Service_name" id="Service_name" required><br>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Service_goals" class="form-label"> Goals: </label>
+                        <input type="text" class="form-control" id="Service_goals" name="Service_goals" required><br>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="Start_date"> From(date): </label>
+                            <input type="date" name="Start_date" id="Start_date" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="End_date"> Until(date): </label>
+                            <input type="date" name="End_date" id="End_date" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="Open_time"> Opening Time: </label>
+                            <input type="time" name="Open_time" id="Open_time" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="Close_time"> Closing Time: </label>
+                            <input type="time" name="Close_time" id="Close_time" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Location"> Location: </label>
+                        <input type="text" name="Location" id="Location" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3" id="doctors_assigned"> <!-- Checkboxes: Doctors assigned --> </div>
+
+                    <input type="submit" class="btn btn-primary" value="Create">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_service_modal"> Close </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- UPDATE service modal -->
+<div class="modal fade" id="Update_this_service" tabindex="-1" aria-labelledby="Update_this_serviceLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Update Service Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close_update_service_modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Update_this_service_form">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <img src="" alt="" id="upd_service_img_preview" width="60%">
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="hidden" name="this_hidden_id" id="this_hidden_id">
+                        <label for="upd_Service_name" class="form-label"> Service name: </label>
+                        <input type="text" class="form-control" name="upd_Service_name" id="upd_Service_name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="upd_Service_goals" class="form-label"> Goals: </label>
+                        <input type="text" class="form-control" id="upd_Service_goals" name="upd_Service_goals" required>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="upd_Start_date"> From(date): </label>
+                            <input type="date" name="upd_Start_date" id="upd_Start_date" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="upd_End_date"> Until(date): </label>
+                            <input type="date" name="upd_End_date" id="upd_End_date" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="upd_Open_time"> Opening Time: </label>
+                            <input type="time" name="upd_Open_time" id="upd_Open_time" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="upd_Close_time"> Closing Time: </label>
+                            <input type="time" name="upd_Close_time" id="upd_Close_time" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="upd_Location"> Location: </label>
+                        <input type="text" name="upd_Location" id="upd_Location" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3" id="upd_doctors_assigned"> <!-- Checkboxes: Doctors assigned --> </div>
+
+                    <input type="submit" class="btn btn-primary" value="Update">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_update_service_modal"> Close </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Delete FUTURE SERVICE Modal -->
+<div class="modal fade" id="Delete_this_Future" tabindex="-1" aria-labelledby="Delete_this_FutureLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"> Do you want to delete this service? </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="Close_delete_modal_future"></button>
+            </div>
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Delete_this_future_service">
+                    {% csrf_token %}
+                    <input type="hidden" name="Delete_future_Service_id" value="" id="Delete_future_Service_id">
+
+                    <div class="mb-3">
+                        <img src="" alt="" id="delete_future_service_img_preview" width="60%">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="delete_future_Service_name" class="form-label"> Service name: </label>
+                        <input type="text" class="form-control" name="delete_future_Service_name" id="delete_future_Service_name" readonly><br>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="delete_future_Service_goals" class="form-label"> Goals: </label>
+                        <input type="text" class="form-control" id="delete_future_Service_goals" name="delete_future_Service_goals" readonly><br>
+                    </div>
+
+                    <input type="submit" class="btn btn-primary" value="Delete">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="Close_delete_modal_future"> Close </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete PREVIOUS SERVICE Modal -->
+<div class="modal fade" id="Delete_this_previous" tabindex="-1" aria-labelledby="Delete_this_previousLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"> Do you want to delete this service? </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="Close_delete_modal_previous"></button>
+            </div>
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Delete_this_previous_service">
+                    {% csrf_token %}
+                    <input type="hidden" name="Delete_previous_Service_id" value="" id="Delete_previous_Service_id">
+
+                    <div class="mb-3">
+                        <img src="" alt="" id="delete_previous_service_img_preview" width="60%">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="delete_previous_Service_name" class="form-label"> Service name: </label>
+                        <input type="text" class="form-control" name="delete_previous_Service_name" id="delete_previous_Service_name" readonly><br>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="delete_previous_Service_goals" class="form-label"> Goals: </label>
+                        <input type="text" class="form-control" id="delete_previous_Service_goals" name="delete_previous_Service_goals" readonly><br>
+                    </div>
+
+                    <input type="submit" class="btn btn-primary" value="Delete">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="Close_delete_modal_previous"> Close </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function conv_date(this_date){
+    var conv_this_date = new Date(this_date).toDateString()
+    return conv_this_date;
+}
+
+function convert_time(this_time){
+    const timeString = this_time;
+    // Prepend any date. Use your birthday.
+    const timeString12hr = new Date('1970-01-01T' + timeString + 'Z')
+    .toLocaleTimeString('en-US',
+        {timeZone:'UTC',hour12:true,hour:'numeric',minute:'numeric'}
+    );
+
+    return timeString12hr;
+}
+
+    // Previous service button FUNCTIONS
+    function get_list_of_previous_services(){
+        $.ajax({
+            type: 'GET',
+            url: '/Health_services/Health_services_superuser/Seasonal_services/get_previous_health_services/',
+            success: function(data){
+                paste_list_of_previous_services(data);
+            },
+            error: function(data){
+                console.log(data);
+            }
+        });
+    }
+    function paste_list_of_previous_services(previous_data){
+        $("#list_of_previous_services").empty();
+
+        if($.trim(previous_data.get_this_lists)){
+            $.each(previous_data.get_this_lists, function(key){
+
+                var Des = 
+
+                "<div class='container-fluid py-4'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Previous Service </h6>"
+                                + "</div>"
+
+                            + "<div class='card-body px-0 pt-0 pb-2'>"
+                                + "<div class='table-responsive p-0'>"
+                                    + "<table class='table align-items-center mb-0'>"
+                                        + "<thead>"
+                                            + "<tr>"
+                                                + "<th class='text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Title</th>"
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Goal</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Duration</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Venue</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Number of Participants</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'></th>" 
+                                            + "</tr>"
+                                        + "</thead>"    
+
+                                                    + "<tbody>"
+
+                                                        + "<tr>"
+                                                            + "<td>"
+                                                                + "<div class='d-flex px-2 py-1'>"
+                                                                    + "<div>"
+                                                                        + "<img src='"+ previous_data.get_this_lists[key].Image +"' class='avatar avatar-sm me-3'>"
+                                                                    + "</div>"
+                                                                        + "<div class='d-flex flex-column justify-content-center'>"
+                                                                            + "<h6 class='mb-0 text-sm'>"
+                                                                                + previous_data.get_this_lists[key].Title
+                                                                            + "</h6>"
+                                                                            + "<p class='text-xs text-secondary mb-0'>Assigned Doctors: "
+                                                                                + previous_data.get_this_lists[key].Assigned_doctor_name
+                                                                            + "</p>" 
+                                                                        + "</div>"
+                                                                + "</div>"        
+                                                            + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + previous_data.get_this_lists[key].Goal
+                                                                    + "</p>"
+                                                                + "</td>"
+                                                                
+                                                                    + "<td>"
+                                                                        + "<p class='text-xs font-weight-bold mb-0'>From:</p>"
+                                                                        + "<p class='text-xs text-secondary mb-0'>"
+                                                                            + conv_date(previous_data.get_this_lists[key].Start_date)
+                                                                        + "</p>"
+                                                                        + "<p class='text-xs font-weight-bold mb-0'>Until:</p>"
+                                                                        + "<p class='text-xs text-secondary mb-0'>"
+                                                                            +  conv_date(previous_data.get_this_lists[key].End_date)
+                                                                                + "("
+                                                                                    + convert_time(previous_data.get_this_lists[key].Open_time)
+                                                                                        + "-"
+                                                                                    + convert_time(previous_data.get_this_lists[key].Close_time)
+                                                                                + ")"
+                                                                        + "</p>"
+                                                                    + "</td>"
+
+                                                                        + "<td>"
+                                                                            + "<p class='text-xs font-weight-bold mb-0'>" 
+                                                                                +  previous_data.get_this_lists[key].Location
+                                                                            + "</p>"
+                                                                        + "</td>"
+
+                                                                            + "<td class='align-middle text-center'>"
+                                                                                + "<p class='text-secondary text-xs font-weight-bold'>"
+                                                                                    + previous_data.count_participants[key].entries
+                                                                                + "</p>"
+                                                                            + "</td>"
+
+                                                                                + "<td class='align-middle'>" 
+                                                                                  + "<button class='btn btn-link pe-3 ps-0 mb-0 ms-auto' onclick='DeleteThisPrevious("+ previous_data.get_this_lists[key].id +")'><i class='far fa-trash-alt me-2'></i>Delete </button>"
+                                                                                + "</td>"
+                                                        + "</tr>"
+                                                    + "</tbody>"
+                                    + "</table>"
+                                + "</div>"
+                            + "</div>"
+                            + "</div>"
+                        + "</div>"
+                    + "</div>"      
+                + "</div>"                    
+
+                // var addMe = "<br><img src='"+ previous_data.get_this_lists[key].Image +"' width='30%'>"
+                // + "<p>Title: " + previous_data.get_this_lists[key].Title + "</p>"
+                // + "<p>Goal: " + previous_data.get_this_lists[key].Goal + "</p>"
+                // + "<p>Duration: From " + conv_date(previous_data.get_this_lists[key].Start_date) + ", Until " + conv_date(previous_data.get_this_lists[key].End_date )
+                //     + " ("+ convert_time(previous_data.get_this_lists[key].Open_time) + "-" + convert_time(previous_data.get_this_lists[key].Close_time) + ")" + "</p>"
+                // + "<p>Venue: " + previous_data.get_this_lists[key].Location + "</p>"
+                // + "<p>Assigned Doctors: " + previous_data.get_this_lists[key].Assigned_doctor_name + "</p>"
+                // + "<p>Number of Participants: " + previous_data.count_participants[key].entries + "</p>"
+                // + "<button type='button' class='btn btn-danger' onclick='DeleteThisPrevious("+ previous_data.get_this_lists[key].id +")'> Delete" + "</button> <br>";
+                $("#list_of_previous_services").append(Des);
+            });
+        }else{
+
+            var Des =
+
+                                "<div class='container-fluid py-4'>"
+                                   + "<div class='row'>"
+                                         + "<div class='col-xl-12 col-sm-6 mb-xl-0 mb-4'>"
+                                            + "<div class='card'>"
+                                                + "<div class='card-body p-3'>"
+                                                    + "<div class='row'>"
+                                                        + "<div class='col-xxl-12'>"
+                                                            + "<div class='numbers'>"
+                                                                + "<h5 class='font-weight-bolder'> You have no previous services here."
+                                                                  
+                                                                + "</h5>"
+                                                            + "</div>"
+                                                        + "</div>"
+                                                    + "</div>"
+                                                + "</div>"
+                                            + "</div>"
+                                        + "</div>"
+                                    + "</div>"
+                                + "</div>"
+      
+            $("#list_of_previous_services").append(Des);
+        }
+    }
+    function click_previous_service_btn(){
+        $("#list_of_ongoing_services").empty();
+        $("#list_of_future_services").empty();
+        get_list_of_previous_services();
+    }
+    // ---------------------------------------------------------------
+
+
+    // Ongoing service button FUNCTIONS
+    function get_list_of_ongoing_services(){
+        $.ajax({
+            type: 'GET',
+            url: '/Health_services/Health_services_superuser/Seasonal_services/get_ongoing_health_services/',
+            success: function(data){
+                paste_list_of_ongoing_services(data);
+            },
+            error: function(data){
+                console.log(data);
+            }
+        });
+    }
+    function paste_list_of_ongoing_services(ongoing_data){
+        $("#list_of_ongoing_services").empty();
+
+        if($.trim(ongoing_data.get_this_lists)){
+            $.each(ongoing_data.get_this_lists, function(key){
+
+                var Des = 
+
+                "<div class='container-fluid py-4'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Ongoing Service </h6>"
+                                + "</div>"
+
+                            + "<div class='card-body px-0 pt-0 pb-2'>"
+                                + "<div class='table-responsive p-0'>"
+                                    + "<table class='table align-items-center mb-0'>"
+                                        + "<thead>"
+                                            + "<tr>"
+                                                + "<th class='text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Title</th>"
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Goal</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Duration</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Venue</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Number of Participants</th>" 
+                                            + "</tr>"
+                                        + "</thead>"    
+
+                                                    + "<tbody>"
+
+                                                        + "<tr>"
+                                                            + "<td>"
+                                                                + "<div class='d-flex px-2 py-1'>"
+                                                                    + "<div>"
+                                                                        + "<img src='"+ ongoing_data.get_this_lists[key].Image +"' class='avatar avatar-sm me-3'>"
+                                                                    + "</div>"
+                                                                        + "<div class='d-flex flex-column justify-content-center'>"
+                                                                            + "<h6 class='mb-0 text-sm'>"
+                                                                                + ongoing_data.get_this_lists[key].Title
+                                                                            + "</h6>"
+                                                                            + "<p class='text-xs text-secondary mb-0'>Assigned Doctors: "
+                                                                                + ongoing_data.get_this_lists[key].Assigned_doctor_name
+                                                                            + "</p>" 
+                                                                        + "</div>"
+                                                                + "</div>"        
+                                                            + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + ongoing_data.get_this_lists[key].Goal
+                                                                    + "</p>"
+                                                                + "</td>"
+                                                                
+                                                                    + "<td>"
+                                                                        + "<p class='text-xs font-weight-bold mb-0'>From:</p>"
+                                                                        + "<p class='text-xs text-secondary mb-0'>"
+                                                                            + conv_date(ongoing_data.get_this_lists[key].Start_date)
+                                                                        + "</p>"
+                                                                        + "<p class='text-xs font-weight-bold mb-0'>Until:</p>"
+                                                                        + "<p class='text-xs text-secondary mb-0'>"
+                                                                            +  conv_date(ongoing_data.get_this_lists[key].End_date)
+                                                                                + "("
+                                                                                    + convert_time(ongoing_data.get_this_lists[key].Open_time)
+                                                                                        + "-"
+                                                                                    + convert_time(ongoing_data.get_this_lists[key].Close_time)
+                                                                                + ")"
+                                                                        + "</p>"
+                                                                    + "</td>"
+
+                                                                        + "<td>"
+                                                                            + "<p class='text-xs font-weight-bold mb-0'>" 
+                                                                                +  ongoing_data.get_this_lists[key].Location
+                                                                            + "</p>"
+                                                                        + "</td>"
+
+                                                                            + "<td class='align-middle text-center'>"
+                                                                                + "<p class='text-secondary text-xs font-weight-bold'>"
+                                                                                    + ongoing_data.count_participants[key].entries
+                                                                                + "</p>"
+                                                                            + "</td>"
+
+                                                        + "</tr>"
+                                                    + "</tbody>"
+                                    + "</table>"
+                                + "</div>"
+                            + "</div>"
+                            + "</div>"
+                        + "</div>"
+                    + "</div>"      
+                + "</div>"           
+
+
+
+
+
+
+                // var addMe = "<br><img src='"+ ongoing_data.get_this_lists[key].Image +"' width='30%'>"
+                // + "<p>Title: " + ongoing_data.get_this_lists[key].Title + "</p>"
+                // + "<p>Goal: " + ongoing_data.get_this_lists[key].Goal + "</p>"
+                // + "<p>Duration: From " + conv_date(ongoing_data.get_this_lists[key].Start_date) + ", Until " + conv_date(ongoing_data.get_this_lists[key].End_date) 
+                //     + " ("+ convert_time(ongoing_data.get_this_lists[key].Open_time) + "-" + convert_time(ongoing_data.get_this_lists[key].Close_time) + ")" + "</p>"
+                // + "<p>Venue: " + ongoing_data.get_this_lists[key].Location + "</p>"
+                // + "<p>Assigned Doctors: " + ongoing_data.get_this_lists[key].Assigned_doctor_name + "</p>"
+                // + "<p>Number of Participants: " + ongoing_data.count_participants[key].entries + "</p> <br>";
+                $("#list_of_ongoing_services").append(Des);
+            });
+        }else{
+            var Des =
+                                "<div class='container-fluid py-4'>"
+                                   + "<div class='row'>"
+                                         + "<div class='col-xl-12 col-sm-6 mb-xl-0 mb-4'>"
+                                            + "<div class='card'>"
+                                                + "<div class='card-body p-3'>"
+                                                    + "<div class='row'>"
+                                                        + "<div class='col-xxl-12'>"
+                                                            + "<div class='numbers'>"
+                                                                + "<h5 class='font-weight-bolder'> You have no list of ongoing services."
+                                                                + "</h5>"
+                                                            + "</div>"
+                                                        + "</div>"
+                                                    + "</div>"
+                                                + "</div>"
+                                            + "</div>"
+                                        + "</div>"
+                                    + "</div>"
+                                + "</div>"
+            $("#list_of_ongoing_services").append(Des);
+        }
+    }
+    function click_ongoing_service_btn(){
+        $("#list_of_previous_services").empty();
+        $("#list_of_future_services").empty();
+        get_list_of_ongoing_services();
+    }
+    // ---------------------------------------------------------------
+
+
+    // Future service button FUNCTIONS
+    function get_list_of_future_services(){
+        $.ajax({
+            type: 'GET',
+            url: '/Health_services/Health_services_superuser/Seasonal_services/get_future_health_services/',
+            success: function(data){
+                paste_list_of_future_services(data);
+            },
+            error: function(data){
+                console.log(data);
+            }
+        });
+    }
+    function paste_list_of_future_services(future_data){
+        $("#list_of_future_services").empty();
+
+        if($.trim(future_data)){
+            $.each(future_data, function(key){
+
+                var Des = 
+
+                "<div class='container-fluid py-4'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Future Service </h6>"
+                                + "</div>"
+
+                            + "<div class='card-body px-0 pt-0 pb-2'>"
+                                + "<div class='table-responsive p-0'>"
+                                    + "<table class='table align-items-center mb-0'>"
+                                        + "<thead>"
+                                            + "<tr>"
+                                                + "<th class='text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Title</th>"
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Goal</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Duration</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Venue</th>" 
+                                                + "<tH class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'></th>" 
+                                            + "</tr>"
+                                        + "</thead>"    
+
+                                                    + "<tbody>"
+
+                                                        + "<tr>"
+                                                            + "<td>"
+                                                                + "<div class='d-flex px-2 py-1'>"
+                                                                    + "<div>"
+                                                                        + "<img src='"+ future_data[key].Image +"' class='avatar avatar-sm me-3'>"
+                                                                    + "</div>"
+                                                                        + "<div class='d-flex flex-column justify-content-center'>"
+                                                                            + "<h6 class='mb-0 text-sm'>"
+                                                                                + future_data[key].Title
+                                                                            + "</h6>"
+                                                                            + "<p class='text-xs text-secondary mb-0'>Assigned Doctors: "
+                                                                                + future_data[key].Assigned_doctor_name
+                                                                            + "</p>" 
+                                                                        + "</div>"
+                                                                + "</div>"        
+                                                            + "</td>"
+
+                                                                + "<td>"
+                                                                    + "<p class='text-xs font-weight-bold mb-0'>"
+                                                                        + future_data[key].Goal
+                                                                    + "</p>"
+                                                                + "</td>"
+                                                                
+                                                                    + "<td>"
+                                                                        + "<p class='text-xs font-weight-bold mb-0'>From:</p>"
+                                                                        + "<p class='text-xs text-secondary mb-0'>"
+                                                                            + conv_date(future_data[key].Start_date)
+                                                                        + "</p>"
+                                                                        + "<p class='text-xs font-weight-bold mb-0'>Until:</p>"
+                                                                        + "<p class='text-xs text-secondary mb-0'>"
+                                                                            +  conv_date(future_data[key].End_date)
+                                                                                + "("
+                                                                                    + convert_time(future_data[key].Open_time)
+                                                                                        + "-"
+                                                                                    + convert_time(future_data[key].Close_time)
+                                                                                + ")"
+                                                                        + "</p>"
+                                                                    + "</td>"
+
+                                                                        + "<td>"
+                                                                            + "<p class='text-xs font-weight-bold mb-0'>" 
+                                                                                +  future_data[key].Location
+                                                                            + "</p>"
+                                                                        + "</td>"
+
+
+                                                                                + "<td class='align-middle'>" 
+                                                                                  + "<button class='btn btn-link pe-3 ps-0 mb-0 ms-auto' onclick='DeleteThisFuture("+ future_data[key].id +")'><i class='far fa-trash-alt me-2'></i>Delete </button>"
+                                                                                  + "<button class='btn btn-link pe-3 ps-0 mb-0 ms-auto' onclick='EditMe("+ future_data[key].id +")'><i class='fas fa-pencil-alt text-dark me-2'></i>Edit </button>"
+                                                                                + "</td>"
+                                                        + "</tr>"
+                                                    + "</tbody>"
+                                    + "</table>"
+                                + "</div>"
+                            + "</div>"
+                            + "</div>"
+                        + "</div>"
+                    + "</div>"      
+                + "</div>"    
+
+
+
+
+                // var addMe = "<br><img src='"+ future_data[key].Image +"' width='30%'>"
+                // + "<p>Title: " + future_data[key].Title + "</p>"
+                // + "<p>Goal: " + future_data[key].Goal + "</p>"
+                // + "<p>Duration: From " + conv_date(future_data[key].Start_date) + ", Until " + conv_date(future_data[key].End_date) 
+                //     + " ("+ convert_time(future_data[key].Open_time) + "-" + convert_time(future_data[key].Close_time) + ")" + "</p>"
+                // + "<p>Venue: " + future_data[key].Location + "</p>"
+                // + "<p>Assigned Doctors: " + future_data[key].Assigned_doctor_name + "</p>"
+                // + "<button type='button' class='btn btn-danger' onclick='DeleteThisFuture("+ future_data[key].id +")'> Delete" + "</button>"
+                // + "<button type='button' class='btn btn-primary' onclick='EditMe("+ future_data[key].id +")'> Edit" + "</button> <br>";
+                $("#list_of_future_services").append(Des);
+            });
+        }else{
+
+
+             var Des =
+
+                                "<div class='container-fluid py-4'>"
+                                   + "<div class='row'>"
+                                         + "<div class='col-xl-12 col-sm-6 mb-xl-0 mb-4'>"
+                                            + "<div class='card'>"
+                                                + "<div class='card-body p-3'>"
+                                                    + "<div class='row'>"
+                                                        + "<div class='col-xxl-12'>"
+                                                            + "<div class='numbers'>"
+                                                                + "<h5 class='font-weight-bolder'> You have no list of future services."
+                                                                + "</h5>"
+                                                            + "</div>"
+                                                        + "</div>"
+                                                    + "</div>"
+                                                + "</div>"
+                                            + "</div>"
+                                        + "</div>"
+                                    + "</div>"
+                                + "</div>"
+            $("#list_of_future_services").append(Des);
+        }
+    }
+    function click_future_service_btn(){
+        $("#list_of_previous_services").empty();
+        $("#list_of_ongoing_services").empty();
+        get_list_of_future_services();
+    }
+    // ---------------------------------------------------------------
+
+
+    // Add FUNCTIONS
+    function open_add_Service_modal(){
+        clean_add_Service_modal();
+        get_list_of_doctors();
+        $("#Add_this_service").modal('show');
+    }
+    function close_add_service_modal(){
+        clean_add_Service_modal();
+        $("#Add_this_service").modal('hide');
+    }
+    function clean_add_Service_modal(){
+        $("#Service_name").val("")
+        $("#Service_goals").val("")
+        $("#Start_date").val("")
+        $("#End_date").val("")
+        $("#Open_time").val("")
+        $("#Close_time").val("")
+        $("#Location").val("")
+        $("#service_img_preview").attr("src", "")
+        $("#service_img").val("")
+        $("#doctors_assigned").empty();
+    }
+    function get_list_of_doctors(){
+        $.ajax({
+            type: 'GET',
+            url: '/Health_services/Health_services_superuser/Doctors/get_list_of_doctors/',
+            success: function(data){
+                if($.trim(data.getimgs)){
+                    $("#doctors_assigned").empty();
+                    var addThis = "<p> Assigned Doctors: </p>";
+                    $("#doctors_assigned").append(addThis);
+                    $.each(data.getimgs, function(i){
+                        var addMe = "<input type='checkbox' name='assigned' id='checkbox"+ i +"' value='"+ data.getimgs[i].id +"'> "
+                        + "<label for='checkbox"+ i +"' value='"+ data.getimgs[i].id +"'>" + data.getimgs[i].Name + " - " + data.getimgs[i].Specialty + "</label> <br>";
+                        $("#doctors_assigned").append(addMe);
+                    });
+                }else{
+                    $("#doctors_assigned").empty();
+                }
+            },
+            error: function(data){
+                console.log();
+                $("#doctors_assigned").empty();
+            }
+        });
+    }
+    // ---------------------------------------------------------------
+
+
+    // Trigger this function on page load
+    function do_this_on_page_load(){
+        $("#ongoing_services").trigger('click');
+    }
+    // ---------------------------------------------------------------
+
+
+    // Delete -PREVIOUS-, -FUTURE- FUNCTIONS
+    function DeleteThisPrevious(id){
+        var urls = "/Health_services/Health_services_superuser/Seasonal_services/get_health_service_info/" + id;
+        $.ajax({
+            type: 'GET',
+            url: urls,
+            success: function(data){
+                switch(data){
+                    case "xService":
+                        alert('Service no longer exist. Try again.');
+                        Close_delete_PREVIOUS_modal();
+                        $("#previous_services").trigger('click');
+                        break;
+                    default:
+                        Clean_delete_Previous_modal();
+                        $("#Delete_this_previous").modal('show');
+                        $("#Delete_previous_Service_id").val(data[0].id);
+                        $("#delete_previous_Service_name").val(data[0].Title);
+                        $("#delete_previous_Service_goals").val(data[0].Goal);
+                        $("#delete_previous_service_img_preview").attr("src", data[0].Image);
+                        break;
+                }
+            },
+            error: function(data){
+                console.log(data);
+                $("#previous_services").trigger('click');
+            }
+        });
+    }
+    function DeleteThisFuture(id){
+        var urls = "/Health_services/Health_services_superuser/Seasonal_services/get_health_service_info/" + id;
+        $.ajax({
+            type: 'GET',
+            url: urls,
+            success: function(data){
+                switch(data){
+                    case "xService":
+                        alert('Service no longer exist. Try again.');
+                        Close_delete_FUTURE_modal();
+                        $("#future_services").trigger('click');
+                        break;
+                    default:
+                        Clean_delete_future_modal();
+                        $("#Delete_this_Future").modal('show');
+                        $("#Delete_future_Service_id").val(data[0].id);
+                        $("#delete_future_Service_name").val(data[0].Title);
+                        $("#delete_future_Service_goals").val(data[0].Goal);
+                        $("#delete_future_service_img_preview").attr("src", data[0].Image);
+                        break;
+                }
+            },
+            error: function(data){
+                console.log(data);
+                $("#future_services").trigger('click');
+            }
+        });
+    }
+    function Close_delete_FUTURE_modal(){
+        Clean_delete_future_modal();
+        $("#Delete_this_Future").modal('hide');
+    }
+    function Close_delete_PREVIOUS_modal(){
+        Clean_delete_Previous_modal();
+        $("#Delete_this_previous").modal('hide');
+    }
+    function Clean_delete_Previous_modal(){
+        $("#Delete_previous_Service_id").val("");
+        $("#delete_previous_Service_name").val("");
+        $("#delete_previous_Service_goals").val("");
+        $("#delete_previous_service_img_preview").attr("src", '');
+    }
+    function Clean_delete_future_modal(){
+        $("#Delete_future_Service_id").val("");
+        $("#delete_future_Service_name").val("");
+        $("#delete_future_Service_goals").val("");
+        $("#delete_future_service_img_preview").attr("src", '');
+    }
+    // --------------------------------------------------------------
+
+
+    // Edit FUNCTIONS
+    function EditMe(id){
+        var urls = "/Health_services/Health_services_superuser/Seasonal_services/get_health_service_info/" + id;
+        $.ajax({
+            type: 'GET',
+            url: urls,
+            success: function(data){
+                switch(data){
+                    case "xService":
+                        alert('Service no longer exist. Try again.');
+                        close_update_modal();
+                        $("#future_services").trigger('click');
+                        break;
+                    default:
+                    clean_update_modal();
+                        $("#Update_this_service").modal('show');
+                        $("#this_hidden_id").val(data[0].id)
+                        $("#upd_Service_name").val(data[0].Title)
+                        $("#upd_Service_goals").val(data[0].Goal)
+                        $("#upd_Start_date").val(data[0].Start_date)
+                        $("#upd_End_date").val(data[0].End_date)
+                        $("#upd_Open_time").val(data[0].Open_time)
+                        $("#upd_Close_time").val(data[0].Close_time)
+                        $("#upd_Location").val(data[0].Location)
+                        $("#upd_service_img_preview").attr("src", data[0].Image)
+                        EditService_paste_list_of_doctors();
+                        break;
+                }
+            },
+            error: function(data){
+                console.log(data);
+                $("#future_services").trigger('click');
+            }
+        });
+    }
+    function clean_update_modal(){
+        $("#upd_Service_name").val("")
+        $("#upd_Service_goals").val("")
+        $("#upd_Start_date").val("")
+        $("#upd_End_date").val("")
+        $("#upd_Open_time").val("")
+        $("#upd_Close_time").val("")
+        $("#upd_Location").val("")
+        $("#this_hidden_id").val("")
+        $("#upd_service_img_preview").attr("src", "")
+        $("#upd_doctors_assigned").empty();
+    }
+    function close_update_modal(){
+        clean_update_modal();
+        $("#Update_this_service").modal('hide');
+    }
+    function EditService_paste_list_of_doctors(){
+        $.ajax({
+            type: 'GET',
+            url: '/Health_services/Health_services_superuser/Doctors/get_list_of_doctors/',
+            success: function(data){
+                if($.trim(data.getimgs)){
+                    $("#upd_doctors_assigned").empty();
+                    var addThis = "<p> Assigned Doctors: </p>";
+                    $("#upd_doctors_assigned").append(addThis);
+                    $.each(data.getimgs, function(i){
+                        var addMe = "<input type='checkbox' name='update_this_assigned' id='checkbox"+ i +"' value='"+ data.getimgs[i].id +"'> "
+                        + "<label for='checkbox"+ i +"' value='"+ data.getimgs[i].id +"'>" + data.getimgs[i].Name + " - " + data.getimgs[i].Specialty + "</label> <br>";
+                        $("#upd_doctors_assigned").append(addMe);
+                    });
+                }else{
+                    $("#upd_doctors_assigned").empty();
+                }
+            },
+            error: function(data){
+                console.log();
+                $("#upd_doctors_assigned").empty();
+            }
+        });
+    }
+    // --------------------------------------------------------------
+
+    $(document).ready(function(){
+
+        // Modal click functions
+        $("#create_service").on('click', open_add_Service_modal);
+        $("#close_service_modal").on('click', close_add_service_modal);
+        $("#close_update_service_modal").on('click', close_update_modal);
+        $("#Close_delete_modal_future").on('click', Close_delete_FUTURE_modal);
+        $("#Close_delete_modal_previous").on('click', Close_delete_PREVIOUS_modal);
+
+        // Click service BTNs, perform this:
+        $("#previous_services").on('click', click_previous_service_btn);
+        $("#ongoing_services").on('click', click_ongoing_service_btn);
+        $("#future_services").on('click', click_future_service_btn);
+
+        do_this_on_page_load();
+
+        $("#open_images").click(function(){
+            $("#service_img").trigger('click');
+        });
+
+        $("#service_img").change(function () {
+            var ext = $('#service_img').val().split('.').pop().toLowerCase();
+            if($.inArray(ext, ['png','jpg','jpeg']) == -1) {
+                $("#service_img").val("");
+                $("#service_img_preview").attr("src", "");
+                alert('You can only upload jpg/png file.');
+            }else{
+                const file = this.files[0];
+                if (file) {
+                    let reader = new FileReader();
+                    reader.onload = function (event) {
+                    $("#service_img_preview")
+                    .attr("src", event.target.result);
+                };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    
+        $(document).on('submit', '#Delete_this_previous_service', function(e){
+            e.preventDefault();
+            var data = new FormData($('#Delete_this_previous_service').get(0));
+            $.ajax({
+                type: 'POST',
+                url: "/Health_services/Health_services_superuser/Seasonal_services/Delete_this_previous_service/",
+                data: data,
+                contentType: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    switch(data){
+                        case "xService":
+                            alert('Service no longer exist.');
+                            Close_delete_PREVIOUS_modal();
+                            $("#previous_services").trigger('click');
+                            break;
+                        default:
+                            Close_delete_PREVIOUS_modal();
+                            $("#previous_services").trigger('click');
+                            break;
+                    }
+                },
+                error: function(data){
+                    console.log(data);
+                    Close_delete_PREVIOUS_modal();
+                    $("#previous_services").trigger('click');
+                }
+            });
+        });
+
+        $(document).on('submit', '#Delete_this_future_service', function(e){
+            e.preventDefault();
+            var data = new FormData($('#Delete_this_future_service').get(0));
+            $.ajax({
+                type: 'POST',
+                url: "/Health_services/Health_services_superuser/Seasonal_services/Delete_this_future_service/",
+                data: data,
+                contentType: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    switch(data){
+                        case "xService":
+                            alert('Service no longer exist.');
+                            Close_delete_FUTURE_modal();
+                            $("#future_services").trigger('click');
+                            break;
+                        default:
+                            Close_delete_FUTURE_modal();
+                            $("#future_services").trigger('click');
+                            break;
+                    }
+                },
+                error: function(data){
+                    console.log(data);
+                    Close_delete_FUTURE_modal();
+                    $("#future_services").trigger('click');
+                }
+            });
+        });
+
+        $(document).on("submit", "#Add_this_service_form", function(e){
+            e.preventDefault();
+            var data = new FormData($('#Add_this_service_form').get(0));
+            $.ajax({
+                type: 'POST',
+                url: "/Health_services/Health_services_superuser/Seasonal_services/Add_this_service/",
+                data: data,
+                contentType: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    switch(data){
+                        case "xAssigned":
+                            alert('Assign a doctor before submitting this form.')
+                            break;
+                        case "xDate":
+                            alert('Incorrect date format! Try again.')
+                            break;
+                        case "xTime":
+                            alert('Incorrect time format! Try again.')
+                            break;
+                        default:
+                            alert('Service added');
+                            close_add_service_modal();
+                            // do_this_on_page_load();
+                            $("#future_services").trigger('click');
+                            break;
+                    }
+                },
+                error: function(data){
+                    console.log(data);
+                    close_add_service_modal();
+                    do_this_on_page_load();
+                }
+            });
+        });
+
+        $(document).on('submit', '#Update_this_service_form', function(e){
+            e.preventDefault();
+            var data = new FormData($('#Update_this_service_form').get(0));
+            $.ajax({
+                type: 'POST',
+                url: "/Health_services/Health_services_superuser/Seasonal_services/Update_this_service/",
+                data: data,
+                contentType: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    switch(data){
+                        case "xAssigned":
+                            alert('Assign a doctor before submitting this form.')
+                            break;
+                        case "xDate":
+                            alert('Incorrect date format! Try again.')
+                            break;
+                        case "xTime":
+                            alert('Incorrect time format! Try again.')
+                            break;
+                        case "xService":
+                            alert('Update failed! Service no longer exist.');
+                            close_update_modal();
+                            $("#future_services").trigger('click');
+                            break;
+                        default:
+                            // alert('Service Updated.');
+                            close_update_modal();
+                            $("#future_services").trigger('click');
+                            break;
+                    }
+                },
+                error: function(data){
+                    console.log(data);
+                    close_update_modal();
+                    $("#future_services").trigger('click');
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock content %}

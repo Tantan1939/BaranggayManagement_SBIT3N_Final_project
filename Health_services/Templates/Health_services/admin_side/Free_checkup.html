@@ -1,0 +1,330 @@
+{% extends 'Health_services/admin_side/main.html' %}
+{% block content %}
+
+<div id="lists_of_unassigned"> <!-- Display list of unassigned doctors --> </div>
+
+<div id="lists_of_assigned"> <!-- Display list of assigned doctors --> </div>
+
+<!-- Hidden form ASSIGN -->
+<form method="post" enctype="multipart/form-data" id="serve_id">
+    {% csrf_token %}
+    <input type="hidden" name="this_id" id="this_id" value="">
+    <input type="submit" value="" style="display: none;">
+</form>
+
+<!-- Hidden form UNASSIGN -->
+<form method="post" enctype="multipart/form-data" id="serve_this_id">
+    {% csrf_token %}
+    <input type="hidden" name="unassign_this_id" id="unassign_this_id" value="">
+    <input type="submit" value="" style="display: none;">
+</form>
+
+<script>
+    //Unassigned doctor FUNCTIONS
+    function get_lists_of_doctors(){
+        $.ajax({
+            type: 'GET',
+            url: '/Health_services/Health_services_superuser/Free_checkup/Freecheckup_doctors/',
+            success: function(data){
+                if($.trim(data.unassigned_doctors) || $.trim(data.assigned_doctors)){
+                    if($.trim(data.unassigned_doctors)){
+                        paste_list_of_unassigned_doctors(data.unassigned_doctors);
+                    }else{
+                        $("#lists_of_unassigned").empty();
+                    }
+
+                    if($.trim(data.assigned_doctors)){
+                        paste_list_of_assigned_doctors(data.assigned_doctors);
+                    }else{
+                        $("#lists_of_assigned").empty();
+                    }
+                }else{
+                    $("#lists_of_unassigned").empty();
+                    $("#lists_of_assigned").empty();
+                    var addMe = "<p> You don't have list of Doctors." + "</p>";
+                    $("#lists_of_unassigned").append(addMe);
+                }
+            },
+            error: function(data){
+                console.log(data);
+            }
+        });
+    }
+    function paste_list_of_unassigned_doctors(data_unassigned_doctors){
+        $("#lists_of_unassigned").empty();
+        $.each(data_unassigned_doctors, function(key){
+
+
+            var DesAddMe = 
+
+                "<div class='container-fluid py-3'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Doctors </h6>"
+                                + "</div>"
+
+                                    + "<div class='card-body px-0 pt-0 pb-2'>"
+                                        + "<div class='table-responsive p-0'>"
+                                            + "<table class='table align-items-center mb-0'>"
+                                                + "<thead>"
+                                                    + "<tr>"
+                                                        + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7'>Name</th>"
+                                                        + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Contact Number</th>"
+                                                        + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Age</th>"
+                                                        + "<th class='text-secondary opacity-7'></th>"
+                                                    + "</tr>"
+                                                + "</thead>"
+
+                                                        + "<tbody>"
+                                                            + "<tr>"
+                                                                + "<td>"
+                                                                    + "<div class='d-flex px-2 py-1'>"
+                                                                        + "<div>"
+                                                                            + "<img src='"+data_unassigned_doctors[key].Picture + "' class='avatar avatar-sm me-3'>"
+                                                                        + "</div>"
+
+                                                                            + "<div class='d-flex flex-column justify-content-center'>"
+                                                                                
+                                                                                + "<h6 class='mb-0 text-sm'>"
+                                                                                    +  data_unassigned_doctors[key].Name
+                                                                                + "</h6>"
+
+                                                                                    + "<p class='text-xs text-secondary mb-0'>"
+                                                                                        + data_unassigned_doctors[key].Specialty
+                                                                                    + "</p>"
+
+                                                                            + "</div>"
+                                                                    + "</div>"
+                                                                + "</td>"
+                                                                        
+                                                                        + "<td>"
+
+                                                                            + "<span class='text-secondary text-xs font-weight-bold'>" 
+                                                                                + data_unassigned_doctors[key].Contact_number
+                                                                            + "</span>"
+
+                                                                        + "</td>"
+
+                                                                        + "<td>"
+
+                                                                            + "<span class='text-secondary text-xs font-weight-bold'>" 
+                                                                                + data_unassigned_doctors[key].Age
+                                                                            + "</span>"
+
+                                                                        + "</td>"
+
+                                                                        + "<td class='align-middle'>"
+
+                                                                            + "<span class='text-xs font-weight-bold'>" 
+                                                                                + "<button type='button' class='badge badge-sm bg-gradient-faded-info font-weight-bold text-xs' onclick='AssignMe("+ data_unassigned_doctors[key].id +")'>" 
+                                                                                    + "Assign Now" 
+                                                                                + "</button>"
+                                                                            + "</span>"
+
+                                                                        + "</td>"
+                                                            + "</tr>"
+                                                        + "</tbody>"
+                                            + "</table>"
+                                        + "</div>"
+                                    + "</div>"
+                        + "</div>"
+                    + "</div>"
+                + "</div>"
+
+            // var addMe = "<img src='"+ data_unassigned_doctors[key].Picture +"' width='20%'>"
+            // + "<p>" + data_unassigned_doctors[key].Name + "</p>"
+            // + "<p>" + data_unassigned_doctors[key].Age + "</p>"
+            // + "<p>" + data_unassigned_doctors[key].Contact_number + "</p>"
+            // + "<p>" + data_unassigned_doctors[key].Specialty + "</p>"
+            // + "<button type='button' onclick='AssignMe("+ data_unassigned_doctors[key].id +")' class='btn btn-primary'>" + "Assign Now" + "</button>" + "<br>";
+            
+            $("#lists_of_unassigned").append(DesAddMe);
+        })
+    }
+    function UnassignMe(id){
+        $("#unassign_this_id").val("");
+        $("#unassign_this_id").val(id);
+        $("#serve_this_id").trigger('submit');
+    }
+    // END ----------------------------------------------------------------------------
+
+
+    // Assigned Doctors FUNCTIONS
+    function paste_list_of_assigned_doctors(data_assigned_doctors){
+        $("#lists_of_assigned").empty();
+        $.each(data_assigned_doctors, function(key){
+
+            var Des =
+
+            "<div class='container-fluid py-3'>"
+                    + "<div class='row'>"
+                        + "<div class='col-12'>"
+                            + "<div class='card mb-4'>"
+                                + "<div class='card-header pb-0'>"
+                                    + "<h6> Doctors </h6>"
+                                + "</div>"
+
+                                    + "<div class='card-body px-0 pt-0 pb-2'>"
+                                        + "<div class='table-responsive p-0'>"
+                                            + "<table class='table align-items-center mb-0'>"
+                                                + "<thead>"
+                                                    + "<tr>"
+                                                        + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7'>Name</th>"
+                                                        + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Contact Number</th>"
+                                                        + "<th class='text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2'>Age</th>"
+                                                        + "<th class='text-secondary opacity-7'></th>"
+                                                    + "</tr>"
+                                                + "</thead>"
+
+                                                        + "<tbody>"
+                                                            + "<tr>"
+                                                                + "<td>"
+                                                                    + "<div class='d-flex px-2 py-1'>"
+                                                                        + "<div>"
+                                                                            + "<img src='"+data_assigned_doctors[key].Picture + "' class='avatar avatar-sm me-3'>"
+                                                                        + "</div>"
+
+                                                                            + "<div class='d-flex flex-column justify-content-center'>"
+                                                                                
+                                                                                + "<h6 class='mb-0 text-sm'>"
+                                                                                    +  data_assigned_doctors[key].Name
+                                                                                + "</h6>"
+
+                                                                                    + "<p class='text-xs text-secondary mb-0'>"
+                                                                                        + data_assigned_doctors[key].Specialty
+                                                                                    + "</p>"
+
+                                                                            + "</div>"
+                                                                    + "</div>"
+                                                                + "</td>"
+                                                                        
+                                                                        + "<td>"
+
+                                                                            + "<span class='text-secondary text-xs font-weight-bold'>" 
+                                                                                + data_assigned_doctors[key].Contact_number
+                                                                            + "</span>"
+
+                                                                        + "</td>"
+
+                                                                        + "<td>"
+
+                                                                            + "<span class='text-secondary text-xs font-weight-bold'>" 
+                                                                                + data_assigned_doctors[key].Age
+                                                                            + "</span>"
+
+                                                                        + "</td>"
+
+                                                                        + "<td class='align-middle'>"
+
+                                                                            + "<span class='text-xs font-weight-bold'>" 
+                                                                                + "<button type='button' class='badge badge-sm bg-gradient-danger font-weight-bold text-xs' onclick='UnassignMe("+ data_assigned_doctors[key].id +")'>" 
+                                                                                    + "Remove Now" 
+                                                                                + "</button>"
+                                                                            + "</span>"
+
+                                                                        + "</td>"
+                                                            + "</tr>"
+                                                        + "</tbody>"
+                                            + "</table>"
+                                        + "</div>"
+                                    + "</div>"
+                        + "</div>"
+                    + "</div>"
+                + "</div>"
+
+            // var addMe = "<img src='"+ data_assigned_doctors[key].Picture +"' width='20%'>"
+            // + "<p>" + data_assigned_doctors[key].Name + "</p>"
+            // + "<p>" + data_assigned_doctors[key].Age + "</p>"
+            // + "<p>" + data_assigned_doctors[key].Contact_number + "</p>"
+            // + "<p>" + data_assigned_doctors[key].Specialty + "</p>"
+            // + "<button type='button' onclick='UnassignMe("+ data_assigned_doctors[key].id +")' class='btn btn-danger'>" + "Remove Now" + "</button>" + "<br>";
+            
+            $("#lists_of_assigned").append(Des);
+        })
+    }
+    function AssignMe(id){
+        $("#this_id").val("");
+        $("#this_id").val(id);
+        $("#serve_id").trigger('submit');
+    }
+    // END ----------------------------------------------------------------------------
+
+    $(document).ready(function(){
+        get_lists_of_doctors();
+    });
+
+    $(document).on("submit", "#serve_id", function(e){
+        e.preventDefault();
+        var data = new FormData($('#serve_id').get(0));
+
+        $.ajax({
+            type: 'POST',
+            url: '/Health_services/Health_services_superuser/Free_checkup/Freecheckup_assign_doctor/',
+            data: data,
+            contentType: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            success: function(data){
+                switch(data){
+                    case "xDoc":
+                        get_lists_of_doctors();
+                        alert('Doctor no longer exist. Try again.');
+                        $("#this_id").val("");
+                        break;
+                    default:
+                        get_lists_of_doctors();
+                        $("#this_id").val("");
+                        break;
+                }
+            },
+            error: function(data){
+                console.log(data);
+                get_lists_of_doctors();
+                $("#this_id").val("");
+            }
+        });
+    });
+
+    $(document).on("submit", "#serve_this_id", function(e){
+        e.preventDefault();
+        var data = new FormData($('#serve_this_id').get(0));
+
+        $.ajax({
+            type: 'POST',
+            url: '/Health_services/Health_services_superuser/Free_checkup/Freecheckup_unassign_doctor/',
+            data: data,
+            contentType: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            success: function(data){
+                switch(data){
+                    case "xDoc":
+                        get_lists_of_doctors();
+                        alert('Doctor no longer exist. Try again.');
+                        $("#serve_this_id").val("");
+                        break;
+
+                    case "xUnassign":
+                        get_lists_of_doctors();
+                        alert('Object no longer in the list of assign doctors.');
+                        $("#serve_this_id").val("");
+                        break;
+
+                    default:
+                        get_lists_of_doctors();
+                        $("#serve_this_id").val("");
+                        break;
+                }
+            },
+            error: function(data){
+                console.log(data);
+                get_lists_of_doctors();
+                $("#serve_this_id").val("");
+            }
+        });
+    });
+</script>
+
+{% endblock content %}

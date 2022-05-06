@@ -1,0 +1,28 @@
+<footer class="footer pt-3">
+    <div class="container-fluid">
+      <div class="row align-items-center justify-content-lg-between">
+        <div class="col-lg-6 mb-lg-0 mb-4">
+            {% if get_contact_information %}
+          <div class="copyright text-center text-sm text-muted text-lg-left">
+            &copy; 
+            <a href="https://bit.ly/3fKQZaL" class="font-weight-bold" target="_blank">Contact Us</a> 
+            Through <a target="_blank" href="https://appseed.us">{{get_contact_information.Contact_number}}</a>.
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <ul class="nav nav-footer justify-content-center justify-content-lg-end">
+            <li class="nav-item">
+              <a href="" 
+                 class="nav-link text-muted" target="_blank">{{get_contact_information.Email_address}}</a>
+            {% else %}
+        <p> There's no contact information yet. </p>
+        {% endif %}
+
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+ 

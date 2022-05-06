@@ -1,0 +1,15 @@
+{% extends 'Supersystem_webpages/admin_side/main.html' %}
+
+{% block content %}
+
+    <p> This is the admin side </p>
+    <!-- <a href="{% url 'supersystem_webpages-superuser-list_of_residents' %}"> See resident lists </a> <br>
+    <a href="{% url 'Health_services_superuser-index' %}"> Create health services </a><br> -->
+
+    <a href="{% url 'Appointment_system_superuser-index' %}"> Go to Appointment_system admin page </a><br>
+    <a href="{% url 'brgy_document_issuance_superuser-index' %}"> Go to brgy document issuance admin page </a><br>
+    <a href="{% url 'brgy_report_generation_superuser-index' %}"> Go to brgy report generation admin page </a><br>
+    <a href="{% url 'Health_services_superuser-index' %}"> Go to health services admin page </a><br>
+    <a href="{% url 'record_management_superuser-index' %}"> Go to Record management admin page </a><br>
+
+{% endblock content %}

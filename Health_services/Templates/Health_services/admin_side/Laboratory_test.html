@@ -1,0 +1,479 @@
+{% extends 'Health_services/admin_side/main.html' %}
+
+{% block content %}
+<style>
+    /* hide arrow in html input type number */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+    }
+</style>
+
+<br>&nbsp;
+<button id="create" value="create" class="btn btn-primary"> Create LabTests </button>
+<button id="view" value="view" class="btn btn-primary"> View LabTests </button>
+
+
+
+<div id= "createLab">
+    <div class="container-fluid py-4">
+        <div class="row my-3">
+            <div class="col-12 ">
+                <div class="card  mb-4">
+                    <div class="card-header pb-0 p-3">
+                        <div class="row">
+                            <div class="col-md-8 d-flex align-items-center">
+                                <h6 class="mb-0"> Create Laboratory Test</h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-3">
+                    
+                        <form method="post" enctype="multipart/form-data" id="create_labtest">
+                            {% csrf_token %}
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="lab_title"> Test Name: </label>
+                                        <input class="form-control" type="text" id="lab_title" name="lab_title" required><br>
+                                    </div>
+                                </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="lab_fees"> Test Fee: </label>
+                                            <input class="form-control" type="number" id="lab_fees" name="lab_fees" required> 
+                                            <p class="text-xs text-secondary mb-0 font-weight-bolder">
+                                                Enter 0 if it's free
+                                            </p>
+                                        </div>
+                                    </div>
+                            </div>
+                    
+                            <div class="form-group">
+                                <label for="lab_desc"> Test Description: </label>
+                                <textarea class="form-control" name="lab_desc" id="lab_desc" cols="40" rows="5" required></textarea><br>
+                            </div>
+                        
+                        <div class="form-group">
+                            <label for=""> Require Appointment: </label>
+                            <input type="radio" name="lab_bool" id="tru_bool" value="True">
+                            <label for="tru_bool"> Yes </label>
+                    
+                            <input  type="radio" name="lab_bool" id="fal_bool" value="False">
+                            <label for="fal_bool"> No </label>
+                        </div>
+                                
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input class="form-control btn bg-gradient-success" type="submit" value="Create"><br>
+                                      </div>
+                                </div>
+                    
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                      <a class="btn bg-gradient-success form-control" href="{% url 'Health_services_superuser-index' %}"> Go Back </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="viewLab">
+</div>
+
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="showEdit" tabindex="-1" aria-labelledby="showEditLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Update Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="xCloseModal"></button>
+            </div>
+            <div class="modal-body">
+            <p class="lead"></p>
+
+            <form method="post" enctype="multipart/form-data" id="edit-form">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <input type="hidden" name="LabTEST_ID" id="LabTEST_ID" value="">
+                    <label for="labtestName" class="form-label"> Laboratory Test </label>
+                    <input type="text" class="form-control" name="labtestName" id="labtestName" required readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="Desc" class="form-label"> Description </label>
+                    <textarea name="Desc" id="Desc" cols="30" rows="10" class="form-control" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="fees" class="form-label"> Fees </label>
+                    <input type="number" class="form-control" name="fees" id="fees" required>
+                </div>
+                <div class="mb-3">
+                    <label for="" class="form-label"> Require Appointment: </label>
+                    <input type="radio" name="lab_bool" id="tru_bool" value="True">
+                    <label for="tru_bool"> Yes </label>
+            
+                    <input type="radio" name="lab_bool" id="fal_bool" value="False">
+                    <label for="fal_bool"> No </label>
+                </div>
+                    <input type="submit" class="btn btn-primary" value="Update">
+            </form>
+
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeBtn"> Close </button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="showDelete" tabindex="-1" aria-labelledby="showDeleteLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel"> Do you want to delete? </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="DelCloseModal"></button>
+            </div>
+            <div class="modal-body">
+            <p class="lead"></p>
+
+            <form method="post" enctype="multipart/form-data" id="delete-form">
+                {% csrf_token %}
+                <input type="hidden" name="labtestID" value="" id="labtestID">
+                <input type="submit" class="btn btn-primary" value="Delete">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="DelcloseBtn"> Close </button>
+            </form>
+
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    function convert_fees(fee){
+        if (fee > 0){
+            return fee
+        }else{
+            return "Free"
+        }
+    }
+
+    function hideViews(){
+        $("#viewLab").empty();
+        $("#viewLab").hide();
+        $("#createLab").show();
+    };
+
+    function hideCreate(){
+        $("#viewLab").show();
+        $("#createLab").hide();
+        getLabTests();
+    };
+
+    function clearEverything(){
+        document.getElementById('lab_title').value = ""
+        document.getElementById('lab_desc').value = ""
+        document.getElementById('lab_fees').value = ""
+    }
+
+    var EditMe = function(LabID){
+        urls = '/Health_services/Health_services_superuser/Laboratory_tests/Get_SingleLaboratory_test/' + LabID
+        $.ajax({
+            type: 'GET',
+            url: urls,
+            success: function(data){
+
+                if (!$.trim(data.a)){
+                    clearEditModal();
+                    $('#showEdit').modal('hide');
+                    getLabTests();
+                    alert(data);
+                }else{
+                    clearEditModal();
+                    $('#showEdit').modal('show');
+
+                    $("#LabTEST_ID").val(data.id)
+                    $("#labtestName").val(data.a)
+                    $("#Desc").val(data.b)
+                    $("#fees").val(data.c)
+
+                    if(data.d){
+                        $('input:radio[name=lab_bool][id='+ "tru_bool" +']').click();
+                    }else{
+                        $('input:radio[name=lab_bool][id='+ "fal_bool" +']').click();
+                    }
+                }  
+            },
+            error: function(data){
+                clearEditModal();
+                $('#showEdit').modal('hide');
+                getLabTests();
+                alert(data);
+            }
+        });
+    }
+
+    var clearEditModal = function(){
+        $("#labtestName").val("")
+        $("#Desc").val("")
+        $("#fees").val("")
+    }
+
+    var DeleteMe = function(Del_LabID){
+
+        $("#labtestID").val(Del_LabID)
+        $('#showDelete').modal('show');
+    }
+
+    var clearDeleteModal = function(){
+        $("#labtestID").val("")
+    }
+
+    function truncate(str, length, ending){
+        if (length == null) {
+        length = 100;
+        }
+        if (ending == null) {
+            ending = '...';
+        }
+        if (str.length > length) {
+            return str.substring(0, length - ending.length) + ending;
+        }
+        else{
+            return str;
+        }
+
+        // return str.split(" ").splice(0, no_words).join(" ");
+    }
+
+    function getLabTests(){
+        $.ajax({
+            type: 'GET',
+            url: '/Health_services/Health_services_superuser/Laboratory_tests/Get_Laboratory_Test/',
+            success: function(data){
+                $("#viewLab").empty()
+                if (!$.trim(data.list_of_Labtest)){
+                    var noLab = "<p>" + " You have no Laboratory Test " + "</p>";
+                    $("#viewLab").append(noLab)
+                }else{
+                    $.each(data.list_of_Labtest, function(i){
+                        if(data.list_of_Labtest[i].Need_appointment){
+                            var Des = 
+                            
+                                "<ul class='list-group'>"
+                                    + " <li class='list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg'>"
+                                        + "<div class='d-flex flex-column'>"
+                                            + "<h6 class='mb-3 text-sm'>Diagnosis</h6>"
+                                                + " <span class='mb-2 text-xs'>Diagnose with: <span class='text-dark font-weight-bold ms-2'>"
+                                                    + data.list_of_Labtest[i].Title 
+                                                        + "</span></span>"
+
+                                                    + "<span class='mb-2 text-xs'>Description: <span class='text-dark ms-2 font-weight-bold'>"
+                                                        + truncate(data.list_of_Labtest[i].Description, 90)
+                                                            + "</span></span>"
+
+                                                        + "<span class='mb-2 text-xs'>Fee: <span class='text-dark ms-2 font-weight-bold'>"
+                                                            + convert_fees(data.list_of_Labtest[i].Fees)
+                                                                    + "</span></span>"
+
+                                                                    + "<span class='mb-2 text-xs'>Status: <span class='text-dark ms-2 font-weight-bold'>"
+                                                                        + "Appointment is Required "
+                                                                            + "</span></span>"
+                                        + "</div>"
+                                            + "<div class='ms-auto'>"
+                                                + "<button type='button' class='btn btn-link text-dark px-3 mb-0' id='"+ data.list_of_Labtest[i].id +"' value='"+ data.list_of_Labtest[i].id +"' onclick='EditMe("+data.list_of_Labtest[i].id+")'> <i class='fas fa-pencil-alt text-dark me-2' aria-hidden='true'></i> Edit </button>"
+                                                + "<button type='button' class='btn btn-link text-danger text-gradient px-3 mb-0' id='"+ data.list_of_Labtest[i].id +"' value='"+ data.list_of_Labtest[i].id +"' onclick='DeleteMe("+data.list_of_Labtest[i].id+")'> <i class='far fa-trash-alt me-2'></i> Delete </button>"
+                                            + "</div>"
+                                    + "</li>"
+                                + "</ul>";
+          
+                            // var addLab = 
+                            //     "<p>" 
+                            //         + data.list_of_Labtest[i].Title
+                            //             + " " + truncate(data.list_of_Labtest[i].Description, 75)
+                            //                 + " " + convert_fees(data.list_of_Labtest[i].Fees)
+                            //                     + " Appointment required "
+                            //     + "</p>";
+
+                            // var r= $('<button type="button" class="btn btn-link text-dark px-3 mb-0"" id="'+ data.list_of_Labtest[i].id +'" value="'+ data.list_of_Labtest[i].id +'" onclick="EditMe('+data.list_of_Labtest[i].id+')"> <i class="fas fa-pencil-alt text-dark me-2" aria-hidden="true"></i> Edit </button>')
+                            // var s= $('<button type="button" class="btn btn-link text-danger text-gradient px-3 mb-0" id="'+ data.list_of_Labtest[i].id +'" value="'+ data.list_of_Labtest[i].id +'" onclick="DeleteMe('+data.list_of_Labtest[i].id+')"> <i class="far fa-trash-alt me-2"></i> Delete </button>')
+                            
+                            $("#viewLab").append(Des)
+                        }else{
+
+                            var Des = 
+
+                            "<ul class='list-group'>"
+                                    + " <li class='list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg'>"
+                                        + "<div class='d-flex flex-column'>"
+                                            + "<h6 class='mb-3 text-sm'>Diagnosis</h6>"
+                                                + " <span class='mb-2 text-xs'>Diagnose with: <span class='text-dark font-weight-bold ms-2'>"
+                                                    + data.list_of_Labtest[i].Title 
+                                                        + "</span></span>"
+
+                                                    + "<span class='mb-2 text-xs'>Description: <span class='text-dark ms-2 font-weight-bold'>"
+                                                        + truncate(data.list_of_Labtest[i].Description, 90)
+                                                            + "</span></span>"
+
+                                                        + "<span class='mb-2 text-xs'>Fee: <span class='text-dark ms-2 font-weight-bold'>"
+                                                            + convert_fees(data.list_of_Labtest[i].Fees)
+                                                                    + "</span></span>"
+
+                                                                    + "<span class='mb-2 text-xs'>Status: <span class='text-dark ms-2 font-weight-bold'>"
+                                                                        + " No Appointment is Required "
+                                                                            + "</span></span>"
+                                        + "</div>"
+                                            + "<div class='ms-auto'>"
+                                                + "<button type='button' class='btn btn-link text-dark px-3 mb-0' id='"+ data.list_of_Labtest[i].id +"' value='"+ data.list_of_Labtest[i].id +"' onclick='EditMe("+data.list_of_Labtest[i].id+")'> <i class='fas fa-pencil-alt text-dark me-2' aria-hidden='true'></i> Edit </button>"
+                                                + "<button type='button' class='btn btn-link text-danger text-gradient px-3 mb-0' id='"+ data.list_of_Labtest[i].id +"' value='"+ data.list_of_Labtest[i].id +"' onclick='DeleteMe("+data.list_of_Labtest[i].id+")'> <i class='far fa-trash-alt me-2'></i> Delete </button>"
+                                            + "</div>"
+                                    + "</li>"
+                                + "</ul>";
+          
+
+
+                            // var addLab = "<p>" + data.list_of_Labtest[i].Title
+                            // + " " + truncate(data.list_of_Labtest[i].Description, 75)
+                            // + " " + convert_fees(data.list_of_Labtest[i].Fees)
+                            // + " No Appointment required "
+                            // + "</p>";
+
+                            // var r= $('<button type="button" class="btn btn-link text-dark px-3 mb-0" id="'+ data.list_of_Labtest[i].id +'" value="'+ data.list_of_Labtest[i].id +'" onclick="EditMe('+data.list_of_Labtest[i].id+')"> <i class="fas fa-pencil-alt text-dark me-2" aria-hidden="true"></i> Edit </button>')
+                            // var s= $('<button type="button" class="btn btn-link text-danger text-gradient px-3 mb-0" id="'+ data.list_of_Labtest[i].id +'" value="'+ data.list_of_Labtest[i].id +'" onclick="DeleteMe('+data.list_of_Labtest[i].id+')"> <i class="far fa-trash-alt me-2"></i> Delete </button>')
+                            
+                            $("#viewLab").append(Des)
+                        }
+                    });
+                }
+            },
+            error: function(data){
+                console.log(data);
+                $("#viewLab").empty()
+                var noLab = "<p>" + " Django ORM throws an error. Fix it now. " + "</p>";
+                $("#viewLab").append(noLab)
+            }
+        });
+    }
+
+    $(document).on("submit", "#delete-form", function(e){
+        e.preventDefault();
+
+        var data = new FormData($('#delete-form').get(0));
+        $.ajax({
+            type: 'POST',
+            url: '/Health_services/Health_services_superuser/Laboratory_tests/Del_lab_test_info/',
+            data: data,
+            contentType: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            success: function(data){
+                getLabTests();
+                clearDeleteModal();
+                $("#showDelete").modal('hide');
+                console.log(data);
+            },
+            error: function(data){
+                getLabTests();
+                clearDeleteModal();
+                $("#showDelete").modal('hide');
+                console.log(data);
+            }
+        });
+    });
+
+    $(document).on("submit", "#create_labtest", function(e){
+        e.preventDefault();
+
+        var lab_title = $('#lab_title').val();
+        var lab_desc = $('#lab_desc').val();
+        var lab_fees = $('#lab_fees').val();
+
+        if (((lab_title != "") && (lab_desc != "") && (lab_fees != ""))){
+            var data = new FormData($('#create_labtest').get(0));
+            $.ajax({
+                type: 'POST',
+                url: '/Health_services/Health_services_superuser/Laboratory_tests/Create_Laboratory_Test/',
+                data: data,
+                contentType: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    switch(data){
+                        case "xExists":
+                            alert("Laboratory Name already exist.");
+                            $("#lab_title").val('');
+                            break;
+
+                        default:
+                            clearEverything();
+                            alert(data);
+                            break;
+                    }
+                },
+                error: function(data){
+                    clearEverything();
+                    console.log(data);
+                }
+            });
+        }else{
+            alert('Fill all fields.')
+        }
+    });
+
+    $(document).on('submit', '#edit-form', function(e){
+        e.preventDefault();
+
+        var Desc = $("#Desc").val()
+        var fees = $("#fees").val()
+
+        if((Desc != "") && (fees != "")){
+            var data = new FormData($('#edit-form').get(0));
+            $.ajax({
+                type: 'POST',
+                url: '/Health_services/Health_services_superuser/Laboratory_tests/Update_lab_test_info/',
+                data: data,
+                contentType: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                success: function(data){
+                    clearEditModal();
+                    $('#showEdit').modal('hide');
+                    getLabTests();
+                    console.log(data);
+                },
+                error: function(data){
+                    console.log(data);
+                    clearEditModal();
+                    $('#showEdit').modal('hide');
+                    getLabTests();
+                }
+            });
+        }else{
+            alert('Fill all fields');
+        }
+    });
+
+    $(document).ready(function(){
+        hideViews();
+        $('#create').on('click', hideViews);
+        $('#view').on('click', hideCreate);
+
+        $("#closeBtn").on('click', clearEditModal);
+        $("#xCloseModal").on('click', clearEditModal);
+
+        $("#DelCloseModal").on('click', clearDeleteModal);
+        $("#DelcloseBtn").on('click', clearDeleteModal);
+    });
+</script>
+{% endblock content %}

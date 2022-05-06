@@ -1,0 +1,399 @@
+{% extends 'Health_services/admin_side/main.html' %}
+{% block content %}
+<br>
+<button class="btn btn-primary" id="add_spec_btn"><i class="bi bi-plus"></i> Add Specialization </button>
+
+<div id="List_of_specialization"> <!-- Lists of Doctors specialization --> </div>
+
+<!-- Add specialization -->
+<div class="modal fade" id="Add_this_specialization" tabindex="-1" aria-labelledby="Add_this_specializationLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Doctor Specialization</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close_add_specialization_modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Add_this_specialization_form">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="add_Title" class="form-label"> Specialization name: </label>
+                        <input type="text" class="form-control" name="add_Title" id="add_Title" required><br>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="add_Description" class="form-label"> Description: </label>
+                        <textarea class="form-control" name="add_Description" id="add_Description" required cols="30" rows="10"></textarea><br>
+                    </div>
+
+                    <input type="submit" class="btn btn-primary" value="Create">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_add_specialization_modal"> Close </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Update specialization -->
+<div class="modal fade" id="Update_this_specialization" tabindex="-1" aria-labelledby="Update_this_specializationLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Update Doctor Specialization</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close_update_specialization_modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Update_this_specialization_form">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="upd_Title" class="form-label"> Specialization name: </label>
+                        <input type="text" class="form-control" name="upd_Title" id="upd_Title" required><br>
+                        <input type="hidden" name="upd_id" id="upd_id">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="upd_Description" class="form-label"> Description: </label>
+                        <textarea class="form-control" name="upd_Description" id="upd_Description" required cols="30" rows="10"></textarea><br>
+                    </div>
+
+                    <input type="submit" class="btn btn-primary" value="Update">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_update_specialization_modal"> Close </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Delete specialization -->
+<div class="modal fade" id="Delete_this_specialization" tabindex="-1" aria-labelledby="Delete_this_specializationLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Do you want to delete this specialization?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close_delete_specialization_modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="lead"></p>
+                <form method="post" enctype="multipart/form-data" id="Delete_this_specialization_form">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="del_Title" class="form-label"> Specialization name: </label>
+                        <input type="text" class="form-control" name="del_Title" id="del_Title" readonly><br>
+                        <input type="hidden" name="del_id" id="del_id">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="del_Description" class="form-label"> Description: </label>
+                        <textarea class="form-control" name="del_Description" id="del_Description" readonly cols="30" rows="10"></textarea><br>
+                    </div>
+
+                    <input type="submit" class="btn btn-primary" value="Delete">
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_delete_specialization_modal"> Close </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function truncate(str, length, ending){
+        if (length == null) {
+        length = 100;
+        }
+        if (ending == null) {
+            ending = '...';
+        }
+        if (str.length > length) {
+            return str.substring(0, length - ending.length) + ending;
+        }
+        else{
+            return str;
+        }
+
+        // return str.split(" ").splice(0, no_words).join(" ");
+    }
+
+
+// Get all existing specialization
+function get_all_existing_specialization(){
+    $.ajax({
+        type: 'GET',
+        url: '/Health_services/Health_services_superuser/Doctor_specialization/Get_all_Doctor_specialization/',
+        success: function(data){
+            $("#List_of_specialization").empty();
+            if($.trim(data)){
+                $.each(data, function(key){
+
+                    var Des = 
+                            
+                                "<ul class='list-group'>"
+                                    + " <li class='list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg'>"
+                                        + "<div class='d-flex flex-column'>"
+                                            + "<h6 class='mb-3 text-sm'>Diagnosis</h6>"
+                                                + " <span class='mb-2 text-xs'>Specialization: <span class='text-dark font-weight-bold ms-2'>"
+                                                    +  data[key].Title 
+                                                        + "</span></span>"
+
+                                                    + "<span class='mb-2 text-xs'>Description: <span class='text-dark font-weight-bold'>"
+                                                            + truncate(data[key].Description, 75)
+                                                            + "</span></span>"
+                                        + "</div>"
+                                            + "<div class='ms-auto'>"
+                                                + "<button type='button' class='btn btn-link text-dark px-3 mb-0'   onclick='EditMe("+ data[key].id +")'> <i class='fas fa-pencil-alt text-dark me-2' aria-hidden='true'></i> Edit </button>"
+                                                + "<button type='button' class='btn btn-link text-danger text-gradient px-3 mb-0'  onclick='DeleteMe("+ data[key].id +")'> <i class='far fa-trash-alt me-2'></i> Delete </button>"
+                                            + "</div>"
+                                    + "</li>"
+                                + "</ul>";
+
+
+
+
+
+                    // var AddMe = "<br> <p>Name: " + data[key].Title + "</p>"
+                    // + "<p> Description: " + data[key].Description + "</p>"
+                    // + "<button type='button' onclick='EditMe("+ data[key].id +")' class='btn btn-primary'>" + "Edit" + "</button>"
+                    // + "<button type='button' onclick='DeleteMe("+ data[key].id +")' class='btn btn-info'>" + "Delete" + "</button> <br>";
+                    $("#List_of_specialization").append(Des);
+                });
+            }else{
+                var AddMe = "<p>" + " No Specialization exists... " + "</p>";
+                $("#List_of_specialization").append(AddMe);
+            }
+        },
+        error: function(data){
+            console.log(data);
+
+        }
+    });
+}
+
+
+// Add a specialization FUNCTIONS
+function clean_add_specialization_modal(){
+    $("#add_Title").val("");
+    $("#add_Description").val("");
+}
+function close_add_specialization_modal(){
+    clean_add_specialization_modal();
+    $("#Add_this_specialization").modal('hide');
+}
+function open_add_specialization_modal(){
+    clean_add_specialization_modal();
+    $("#Add_this_specialization").modal('show');
+}
+
+
+// Update a specialization FUNCTIONS
+function EditMe(id){
+    var urls = '/Health_services/Health_services_superuser/Doctor_specialization/Get_this_Doctor_specialization_info/' + id;
+    $.ajax({
+        type: 'GET',
+        url: urls,
+        success: function(data){
+            switch(data){
+                case "xExist":
+                    alert('This specialization no longer exist.');
+                    get_all_existing_specialization();
+                    break;
+                default:
+                    $("#Update_this_specialization").modal('show');
+                    clean_edit_specialization_modal();
+                    $("#upd_Title").val(data[0].Title);
+                    $("#upd_id").val(data[0].id);
+                    $("#upd_Description").val(data[0].Description);
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            get_all_existing_specialization();
+        }
+    });
+}
+function clean_edit_specialization_modal(){
+    $("#upd_Title").val('');
+    $("#upd_id").val('');
+    $("#upd_Description").val('');
+}
+function close_edit_specialization_modal(){
+    clean_edit_specialization_modal();
+    $("#Update_this_specialization").modal('hide');
+}
+
+
+// Delete a specialization FUNCTIONS
+function DeleteMe(id){
+    var urls = '/Health_services/Health_services_superuser/Doctor_specialization/Get_this_Doctor_specialization_info/' + id;
+    $.ajax({
+        type: 'GET',
+        url: urls,
+        success: function(data){
+            switch(data){
+                case "xExist":
+                    alert('This specialization no longer exist.');
+                    get_all_existing_specialization();
+                    break;
+                default:
+                    $("#Delete_this_specialization").modal('show');
+                    clean_delete_specialization_modal();
+                    $("#del_id").val(data[0].id);
+                    $("#del_Title").val(data[0].Title);
+                    $("#del_Description").val(data[0].Description);
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            get_all_existing_specialization();
+        }
+    });
+}
+function clean_delete_specialization_modal(){
+    $("#del_Title").val('');
+    $("#del_id").val('');
+    $("#del_Description").val('');
+}
+function close_delete_specialization_modal(){
+    clean_delete_specialization_modal();
+    $("#Delete_this_specialization").modal('hide');
+}
+
+
+
+$(document).ready(function(){
+    get_all_existing_specialization();
+
+    $("#add_spec_btn").on('click', open_add_specialization_modal);
+    $("#close_add_specialization_modal").on('click', close_add_specialization_modal);
+    $("#close_delete_specialization_modal").on('click', close_delete_specialization_modal);
+});
+
+$(document).on('submit', '#Add_this_specialization_form', function(e){
+    e.preventDefault();
+
+    var data = new FormData($('#Add_this_specialization_form').get(0));
+    $.ajax({
+        type: 'POST',
+        url: '/Health_services/Health_services_superuser/Doctor_specialization/Create_this_Doctor_specialization/',
+        data: data,
+        contentType: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        success: function(data){
+            switch(data){
+                case "xTitle":
+                    alert('Specialization name already exists.');
+                    $("#add_Title").val('');
+                    break;
+
+                default:
+                    alert('Specialization added successfully.');
+                    close_add_specialization_modal();
+                    get_all_existing_specialization();
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            close_add_specialization_modal();
+            get_all_existing_specialization();
+        }
+    });
+});
+
+$(document).on('submit', '#Update_this_specialization_form', function(e){
+    e.preventDefault();
+
+    var data = new FormData($('#Update_this_specialization_form').get(0));
+    $.ajax({
+        type: 'POST',
+        url: '/Health_services/Health_services_superuser/Doctor_specialization/Update_this_Doctor_specialization/',
+        data: data,
+        contentType: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        success: function(data){
+            switch(data){
+                case "xName":
+                    alert('Specialization name already exists.');
+                    $("#upd_Title").val('');
+                    break;
+
+                case "xExist":
+                    alert('Specialization no longer exist.');
+                    get_all_existing_specialization();
+                    close_edit_specialization_modal();
+                    break;
+
+                default:
+                    // alert('Specialization Updated.');
+                    get_all_existing_specialization();
+                    close_edit_specialization_modal();
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            close_edit_specialization_modal();
+            get_all_existing_specialization();
+        }
+    });
+});
+
+$(document).on('submit', '#Delete_this_specialization_form', function(e){
+    e.preventDefault();
+
+    var data = new FormData($('#Delete_this_specialization_form').get(0));
+    $.ajax({
+        type: 'POST',
+        url: '/Health_services/Health_services_superuser/Doctor_specialization/Delete_this_Doctor_specialization/',
+        data: data,
+        contentType: 'multipart/form-data',
+        processData: false,
+        contentType: false,
+        success: function(data){
+            switch(data){
+                case "xExist":
+                    alert('Specialization no longer exist.');
+                    get_all_existing_specialization();
+                    close_delete_specialization_modal();
+                    break;
+
+                default:
+                    // alert('Specialization Updated.');
+                    get_all_existing_specialization();
+                    close_delete_specialization_modal();
+                    break;
+            }
+        },
+        error: function(data){
+            console.log(data);
+            close_delete_specialization_modal();
+            get_all_existing_specialization();
+        }
+    });
+});
+
+
+</script>
+{% endblock content %}

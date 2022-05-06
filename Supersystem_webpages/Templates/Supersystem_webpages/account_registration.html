@@ -1,0 +1,101 @@
+{% extends 'Supersystem_webpages/client_side/main.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+<div id="Login">
+    <section class="sign-in">
+        <div class="container-signin">
+            <div class="signin-content">
+                <div class="signin-image">
+                    <figure ><img src="{% static '/Login/images/signup-image.jpg' %}" alt="sing up image"></figure>
+                </div>
+                <div class="signin-form">
+                    <h2 class="form-title-signin">Sign up</h2>
+                    <form method="POST" class="register-form" id="post-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="your_name"><i class="zmdi zmdi-account material-icons-name"></i></label>
+                            <input type="text" name="your_name" id="username" placeholder="Username"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="email"><i class="zmdi zmdi-email"></i></label>
+                            <input type="email" name="email" id="email" placeholder="Your Email"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="your_pass"><i class="zmdi zmdi-lock"></i></label>
+                            <input type="password" name="your_pass" id="password1" placeholder="Password"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="your_pass"><i class="zmdi zmdi-lock"></i></label>
+                            <input type="password" name="your_pass" id="password2" placeholder="Confirm Password"/>
+                        </div>
+                     
+                        <div class="form-group form-button">
+                            <input type="submit" name="signin" id="signin" class="form-submit" value="Log in"/>
+                        </div>
+                    </form>
+                  
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script type="text/javascript">
+    $(document).on('submit', '#post-form', function(e){
+        e.preventDefault();
+
+        var username = $('#username').val()
+        var email = $('#email').val()
+        var password1 = $('#password1').val()
+        var password2 = $('#password2').val()
+
+        if (username == "" || email == "" || password1 == "" || password2 == ""){
+            alert("Fill all fields.")
+        }
+        else{
+            $.ajax({
+            type: 'POST',
+            url: '/create_account/',
+            data:{
+                username, email, password1, password2, csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+            },
+            success: function(data){
+
+                switch(data){
+                    case "username": 
+                        alert("Username already exists! Try a new one.")
+                        document.getElementById('username').value = ''
+                        break;
+                    
+                    case "email":
+                        alert("Email already exists! Try a new one.")
+                        document.getElementById('email').value = ''
+                        break;
+                    
+                    case "password":
+                        alert("Incorrect password! Try again.")
+                        document.getElementById('password2').value = ''
+                        break;
+                    
+                    case "created":
+                        document.getElementById('username').value = ''
+                        document.getElementById('email').value = ''
+                        document.getElementById('password1').value = ''
+                        document.getElementById('password2').value = ''
+                        alert("Account created.")
+                        location.href = '/login/';
+                        break;
+                }
+            }
+        });
+        }
+    });
+
+</script>
+
+{% endblock content %}
